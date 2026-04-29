@@ -1,0 +1,6 @@
+[
+  "Conectar PostgreSQL real y validar carga completa del catálogo.",
+  "Levantar una demo accesible fuera del entorno interno.",
+  "Activar búsqueda full-text real sobre la base cargada.",
+  "Preparar el salto a embeddings y recomendación semántica."
+]

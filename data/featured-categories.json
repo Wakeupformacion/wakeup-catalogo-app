@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Administración y Gestión",
+    "description": "Formación orientada a gestión administrativa, operaciones de empresa y soporte organizativo.",
+    "slug": "administracion-y-gestion"
+  },
+  {
+    "title": "Marketing",
+    "description": "Cursos para captación, comunicación digital, marca y habilidades comerciales.",
+    "slug": "marketing"
+  },
+  {
+    "title": "Informática y Comunicaciones",
+    "description": "Capacitación en herramientas digitales, sistemas, conectividad y soporte tecnológico.",
+    "slug": "informatica-y-comunicaciones"
+  }
+]

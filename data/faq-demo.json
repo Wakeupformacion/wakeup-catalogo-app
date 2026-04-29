@@ -1,0 +1,14 @@
+[
+  {
+    "question": "¿Cómo se actualiza el catálogo?",
+    "answer": "Mediante importación desde Excel, conservando el nombre del curso y su URL oficial de contenidos y objetivos."
+  },
+  {
+    "question": "¿La búsqueda puede mejorar con IA?",
+    "answer": "Sí. La solución ya está preparada para evolucionar desde búsqueda textual y full-text a búsqueda semántica con embeddings."
+  },
+  {
+    "question": "¿Se perderán los enlaces del Excel?",
+    "answer": "No si se mantiene el proceso de importación sobre el XLSX original, que es precisamente como se ha planteado la solución."
+  }
+]

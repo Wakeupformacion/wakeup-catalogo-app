@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Demo navegable",
+    "text": "Versión actual orientada a enseñar el catálogo, el buscador y la arquitectura de solución."
+  },
+  {
+    "title": "MVP conectado",
+    "text": "Con base de datos real, importación activa y catálogo operativo sobre datos completos."
+  },
+  {
+    "title": "Buscador inteligente avanzado",
+    "text": "Evolución con full-text activo, semántica, recomendaciones más potentes y análisis de uso."
+  }
+]

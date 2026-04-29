@@ -1,0 +1,8 @@
+[
+  { "category_normalized": "administracion-contabilidad", "category_label": "Administración / Contabilidad", "total": 120 },
+  { "category_normalized": "marketing-y-comunicacion", "category_label": "Marketing y Comunicación", "total": 95 },
+  { "category_normalized": "rrhh-y-habilidades", "category_label": "RRHH y Habilidades", "total": 88 },
+  { "category_normalized": "prevencion-y-seguridad", "category_label": "Prevención y Seguridad", "total": 74 },
+  { "category_normalized": "sanidad-y-cuidados", "category_label": "Sanidad y Cuidados", "total": 110 },
+  { "category_normalized": "informatica-y-transformacion-digital", "category_label": "Informática y Transformación Digital", "total": 130 }
+]

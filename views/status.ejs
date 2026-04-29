@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Estado de la demo · WakeUp</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <%- include('partials-header') %>
+    <main class="page">
+      <header class="page-header">
+        <a href="/" class="back-link">← Inicio</a>
+        <h1>Estado de la demo</h1>
+        <p>Resumen útil del estado funcional actual del catálogo inteligente.</p>
+      </header>
+
+      <section class="featured-grid">
+        <article class="featured-card">
+          <h3>Modo actual</h3>
+          <p><strong><%= status.mode %></strong></p>
+          <p><%= status.modeDescription %></p>
+        </article>
+        <article class="featured-card">
+          <h3>Cursos disponibles</h3>
+          <p><strong><%= status.courseCount %></strong></p>
+          <p><%= status.courseCountDescription %></p>
+        </article>
+        <article class="featured-card">
+          <h3>Búsqueda</h3>
+          <p><strong><%= status.searchMode %></strong></p>
+          <p><%= status.searchDescription %></p>
+        </article>
+      </section>
+
+      <section class="review-section">
+        <div class="section-heading">
+          <p class="eyebrow dark">Checklist funcional</p>
+          <h2>Qué está operativo ahora mismo</h2>
+        </div>
+        <div class="review-card">
+          <ul>
+            <% status.items.forEach(function(item) { %>
+              <li><%= item %></li>
+            <% }) %>
+          </ul>
+        </div>
+      </section>
+
+      <section class="cta-band status-cta-band">
+        <div>
+          <p class="eyebrow dark">Siguiente acción</p>
+          <h2>Probar la navegación real del catálogo</h2>
+          <p>Desde aquí puedes saltar a la experiencia completa o validar directamente la API.</p>
+        </div>
+        <div class="status-actions">
+          <a class="button" href="/cursos">Abrir catálogo</a>
+          <a class="button ghost" href="/api/courses" target="_blank" rel="noopener noreferrer">Abrir API</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= course.title %> · WakeUp</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <%- include('partials-header') %>
+    <main class="page detail-page">
+      <header class="page-header">
+        <a href="/cursos" class="back-link">← Volver al catálogo</a>
+        <p class="eyebrow"><%= course.category_raw || 'Formación online' %></p>
+        <h1><%= course.title %></h1>
+      </header>
+
+      <% if (courseNav && (courseNav.previous || courseNav.next)) { %>
+        <section class="course-nav-row">
+          <% if (courseNav.previous) { %>
+            <a class="button ghost" href="/cursos/<%= courseNav.previous.slug %>">← <%= courseNav.previous.title %></a>
+          <% } else { %>
+            <span></span>
+          <% } %>
+          <% if (courseNav.next) { %>
+            <a class="button ghost" href="/cursos/<%= courseNav.next.slug %>"><%= courseNav.next.title %> →</a>
+          <% } %>
+        </section>
+      <% } %>
+
+      <section class="detail-card">
+        <ul class="meta vertical">
+          <li><strong>Código:</strong> <%= course.course_code %></li>
+          <li><strong>Horas:</strong> <%= course.hours || '-' %></li>
+          <li><strong>Modalidad:</strong> <%= course.delivery_mode %></li>
+          <% if (course.relevance_score) { %>
+            <li><strong>Relevancia:</strong> <%= course.relevance_score %></li>
+          <% } %>
+        </ul>
+
+        <div class="detail-actions">
+          <% if (course.detail_url) { %>
+            <a class="button" href="<%= course.detail_url %>" target="_blank" rel="noopener noreferrer">Ver contenidos y objetivos</a>
+          <% } %>
+          <a class="button ghost" href="/cursos?category=<%= course.category_normalized %>">Más cursos de esta categoría</a>
+        </div>
+
+        <% if (catalogMicrocopy && catalogMicrocopy.detailHint) { %>
+          <p class="helper-text"><%= catalogMicrocopy.detailHint %></p>
+        <% } %>
+
+        <% if (courseHighlights && courseHighlights.length) { %>
+          <div class="review-card highlights-card">
+            <ul>
+              <% courseHighlights.forEach(function(item) { %>
+                <li><%= item %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+
+        <div class="detail-note">
+          <p>
+            Esta ficha resume el curso dentro del catálogo. El detalle completo de contenidos y objetivos se abre desde el enlace oficial.
+          </p>
+        </div>
+      </section>
+
+      <% if (relatedCourses && relatedCourses.length) { %>
+        <section class="related-section">
+          <div class="section-heading">
+            <p class="eyebrow dark">También te puede interesar</p>
+            <h2>Cursos relacionados</h2>
+            <% if (catalogMicrocopy && catalogMicrocopy.relatedHint) { %>
+              <p class="helper-text"><%= catalogMicrocopy.relatedHint %></p>
+            <% } %>
+          </div>
+          <div class="related-grid">
+            <% relatedCourses.forEach(function(item) { %>
+              <article class="featured-card">
+                <p class="card-category"><%= item.category_raw || 'Sin categoría' %></p>
+                <h3><a href="/cursos/<%= item.slug %>"><%= item.title %></a></h3>
+                <p><strong><%= item.hours || '-' %></strong> horas · modalidad <%= item.delivery_mode %></p>
+                <div class="card-actions">
+                  <a class="button ghost" href="/cursos/<%= item.slug %>">Ver curso</a>
+                </div>
+              </article>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
+    </main>
+  </body>
+</html>

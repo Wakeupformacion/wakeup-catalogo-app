@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Importación del catálogo",
+    "text": "Se procesa el Excel original y se conservan tanto los datos del curso como el enlace oficial a contenidos y objetivos."
+  },
+  {
+    "title": "Normalización y estructuración",
+    "text": "Los cursos se transforman a un formato consistente para búsqueda, navegación y futuras actualizaciones."
+  },
+  {
+    "title": "Búsqueda y recomendación",
+    "text": "La web presenta el catálogo y evoluciona hacia un motor capaz de sugerir formación según necesidad real."
+  }
+]

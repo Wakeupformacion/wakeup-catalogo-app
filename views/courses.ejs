@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catálogo · WakeUp</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <%- include('partials-header') %>
+    <main class="page">
+      <header class="page-header">
+        <a href="/" class="back-link">← Inicio</a>
+        <h1>Catálogo de cursos online</h1>
+        <p>Busca por temática, duración o necesidad formativa.</p>
+      </header>
+
+      <form class="filters" action="/cursos" method="get">
+        <input type="text" name="q" value="<%= q %>" placeholder="Busca cursos o escribe tu necesidad formativa..." />
+        <select name="category" class="category-select">
+          <option value="">Todas las categorías</option>
+          <% (allCategories || []).forEach(function(item) { %>
+            <option value="<%= item.category_normalized %>" <%= item.category_normalized === category ? 'selected' : '' %>>
+              <%= item.category_label %> (<%= item.total %>)
+            </option>
+          <% }) %>
+        </select>
+        <input type="number" name="maxHours" value="<%= maxHours || '' %>" placeholder="Máx. horas" min="1" />
+        <button type="submit">Filtrar</button>
+        <% if (q || category || maxHours) { %>
+          <a class="button ghost" href="/cursos">Limpiar filtros</a>
+        <% } %>
+      </form>
+      <% if (catalogMicrocopy && catalogMicrocopy.searchHint) { %>
+        <p class="helper-text"><%= catalogMicrocopy.searchHint %></p>
+      <% } %>
+
+      <% const activeCategoryChip = (categoryChips || []).find(function(item) { return item.category_normalized === category; }); %>
+      <% if (q || category || maxHours) { %>
+        <section class="active-filters-row">
+          <span class="active-filters-label">Filtros activos:</span>
+          <% if (q) { %>
+            <span class="chip active-filter-chip">Búsqueda: <strong><%= q %></strong></span>
+          <% } %>
+          <% if (category) { %>
+            <span class="chip active-filter-chip">Categoría: <strong><%= activeCategoryChip ? activeCategoryChip.category_label : category %></strong></span>
+          <% } %>
+          <% if (maxHours) { %>
+            <span class="chip active-filter-chip">Máx. <strong><%= maxHours %></strong> horas</span>
+          <% } %>
+        </section>
+      <% } %>
+
+      <% if (searchSuggestions && searchSuggestions.length) { %>
+        <section class="chips-row suggestions-row">
+          <% searchSuggestions.forEach(function(item) { %>
+            <a href="/cursos?q=<%= encodeURIComponent(item) %>" class="chip suggestion-chip"><span><%= item %></span></a>
+          <% }) %>
+        </section>
+      <% } %>
+
+      <% if (categoryChips && categoryChips.length) { %>
+        <section class="chips-row">
+          <a href="/cursos" class="chip <%= !category ? 'active' : '' %>">Todas</a>
+          <% categoryChips.forEach(function(item) { %>
+            <a href="/cursos?category=<%= item.category_normalized %>" class="chip <%= item.isActive ? 'active' : '' %>">
+              <span><%= item.category_label %></span>
+              <small><%= item.total %></small>
+            </a>
+          <% }) %>
+        </section>
+        <p class="helper-text">Accesos rápidos a categorías destacadas. En el selector del filtro puedes ver todas.</p>
+      <% } %>
+
+      <section class="results-meta">
+        <p><strong><%= items.length %></strong> cursos mostrados</p>
+        <% if (q) { %>
+          <p>Resultado para: <strong><%= q %></strong></p>
+        <% } else if (category) { %>
+          <p>Explorando cursos dentro de la categoría seleccionada.</p>
+        <% } else { %>
+          <p>Explora el catálogo o empieza por una sugerencia rápida.</p>
+        <% } %>
+        <% if (usingDemoData) { %>
+          <p class="demo-note">Mostrando el catálogo importado en modo fallback mientras la base de datos real no está conectada.</p>
+        <% } %>
+      </section>
+
+      <% if (!items.length) { %>
+        <section class="empty-state">
+          <h2>No hemos encontrado cursos exactos</h2>
+          <p>Prueba con una búsqueda más amplia, otra categoría o elimina el límite de horas.</p>
+          <% if (emptyStateTips && emptyStateTips.length) { %>
+            <ul>
+              <% emptyStateTips.forEach(function(item) { %>
+                <li><%= item %></li>
+              <% }) %>
+            </ul>
+          <% } %>
+        </section>
+      <% } %>
+
+      <section class="cards">
+        <% items.forEach(function(course) { %>
+          <article class="card">
+            <div class="card-body">
+              <p class="card-category"><%= course.category_raw || 'Sin categoría' %></p>
+              <h2><a href="/cursos/<%= course.slug %>"><%= course.title %></a></h2>
+              <ul class="meta">
+                <li><strong>Código:</strong> <%= course.course_code %></li>
+                <li><strong>Horas:</strong> <%= course.hours || '-' %></li>
+                <li><strong>Modalidad:</strong> <%= course.delivery_mode %></li>
+                <% if (typeof course.relevance_score !== 'undefined') { %>
+                  <li><strong>Relevancia:</strong> <%= course.relevance_score %></li>
+                <% } %>
+              </ul>
+            </div>
+            <div class="card-actions">
+              <a class="button ghost" href="/cursos/<%= course.slug %>">Ver curso</a>
+              <% if (course.detail_url) { %>
+                <a class="button" href="<%= course.detail_url %>" target="_blank" rel="noopener noreferrer">Ver contenidos y objetivos</a>
+              <% } %>
+            </div>
+          </article>
+        <% }) %>
+      </section>
+
+      <section class="pagination-row">
+        <% if (hasPrev) { %>
+          <a class="button ghost" href="/cursos?q=<%= encodeURIComponent(q) %>&category=<%= encodeURIComponent(category) %>&maxHours=<%= encodeURIComponent(maxHours || '') %>&offset=<%= prevOffset %>&limit=<%= limit %>">← Anterior</a>
+        <% } else { %>
+          <span></span>
+        <% } %>
+        <% if (items.length === limit) { %>
+          <a class="button ghost" href="/cursos?q=<%= encodeURIComponent(q) %>&category=<%= encodeURIComponent(category) %>&maxHours=<%= encodeURIComponent(maxHours || '') %>&offset=<%= nextOffset %>&limit=<%= limit %>">Siguiente →</a>
+        <% } %>
+      </section>
+    </main>
+  </body>
+</html>

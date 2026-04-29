@@ -1,0 +1,33 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: wakeup_catalogo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d wakeup_catalogo"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 3001
+      CORS_ORIGIN: "*"
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/wakeup_catalogo
+    ports:
+      - "3001:3001"
+    command: ["node", "boot.js"]
+
+volumes:
+  postgres_data:
