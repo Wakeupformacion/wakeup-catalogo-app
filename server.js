@@ -10,6 +10,18 @@ const { toTsQueryTokens } = require('./fulltext');
 const { buildStatus } = require('./status-data');
 const { buildCourseNav } = require('./navigation-utils');
 
+const appBaseUrl = (process.env.APP_BASE_URL || 'https://wakeup-catalogo-app.onrender.com').replace(/\/$/, '');
+
+function buildPageMeta({ title, description, path = '/', image = '/WakeUpLogo.png', type = 'website' }) {
+  return {
+    title,
+    description,
+    canonicalUrl: `${appBaseUrl}${path.startsWith('/') ? path : `/${path}`}`,
+    imageUrl: image.startsWith('http') ? image : `${appBaseUrl}${image.startsWith('/') ? image : `/${image}`}`,
+    type,
+  };
+}
+
 async function safeQuery(query, params = []) {
   try {
     return await pool.query(query, params);
@@ -71,6 +83,11 @@ app.use(express.static(__dirname + '/public'));
 
 app.get('/', (_req, res) => {
   res.render('home', {
+    pageMeta: buildPageMeta({
+      title: 'WakeUp · Catálogo Inteligente',
+      description: 'Explora el catálogo inteligente de WakeUp: cursos online, filtros por necesidad formativa y una base lista para evolucionar hacia búsqueda avanzada.',
+      path: '/',
+    }),
     featuredCategories: getFeaturedCategories(),
     valueProps: getValueProps(),
     trustBlocks: getTrustBlocks(),
@@ -140,12 +157,20 @@ app.get('/cursos', async (req, res) => {
     `);
     categories = categoryResult ? categoryResult.rows : getSampleCategories();
     const topCategories = categories.slice(0, 8);
+    const activeCategoryLabel = categories.find((item) => item.category_normalized === category)?.category_label || '';
 
     const hasPrev = offset > 0;
     const nextOffset = offset + limit;
     const prevOffset = Math.max(offset - limit, 0);
 
     res.render('courses', {
+      pageMeta: buildPageMeta({
+        title: category ? `Catálogo · ${activeCategoryLabel || 'WakeUp'}` : 'Catálogo · WakeUp',
+        description: q
+          ? `Resultados del catálogo WakeUp para ${q}. Explora cursos online y filtra por categoría o duración.`
+          : 'Explora el catálogo WakeUp y encuentra cursos online por temática, categoría y horas.',
+        path: `/cursos${req.originalUrl.includes('?') ? req.originalUrl.slice('/cursos'.length) : ''}`,
+      }),
       items,
       q,
       category,
@@ -174,6 +199,11 @@ app.get('/cursos', async (req, res) => {
 app.get('/estado-demo', async (_req, res) => {
   const dbCheck = await safeQuery('select 1 as ok');
   return res.render('status', {
+    pageMeta: buildPageMeta({
+      title: 'Estado de la demo · WakeUp',
+      description: 'Resumen funcional del catálogo inteligente de WakeUp: modo activo, búsqueda, volumen de cursos y puntos ya operativos.',
+      path: '/estado-demo',
+    }),
     status: buildStatus({ dbConnected: Boolean(dbCheck) }),
   });
 });
@@ -204,6 +234,12 @@ app.get('/cursos/:slug', async (req, res) => {
     const courseNav = buildCourseNav(course.slug, navPool);
 
     return res.render('course-detail', {
+      pageMeta: buildPageMeta({
+        title: `${course.title} · WakeUp`,
+        description: `${course.title}. Curso online de ${course.category_raw || 'formación online'} con ${course.hours || 'duración variable'} horas en el catálogo WakeUp.`,
+        path: `/cursos/${course.slug}`,
+        type: 'article',
+      }),
       course,
       usingDemoData: !result,
       relatedCourses,
