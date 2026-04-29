@@ -196,16 +196,8 @@ app.get('/cursos', async (req, res) => {
   }
 });
 
-app.get('/estado-demo', async (_req, res) => {
-  const dbCheck = await safeQuery('select 1 as ok');
-  return res.render('status', {
-    pageMeta: buildPageMeta({
-      title: 'Estado de la demo · WakeUp',
-      description: 'Resumen funcional del catálogo inteligente de WakeUp: modo activo, búsqueda, volumen de cursos y puntos ya operativos.',
-      path: '/estado-demo',
-    }),
-    status: buildStatus({ dbConnected: Boolean(dbCheck) }),
-  });
+app.get('/estado-demo', (_req, res) => {
+  return res.redirect('/cursos');
 });
 
 app.get('/cursos/:slug', async (req, res) => {

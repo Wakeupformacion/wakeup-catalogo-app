@@ -69,7 +69,6 @@
             </a>
           <% }) %>
         </section>
-        <p class="helper-text">Accesos rápidos a categorías destacadas. En el selector del filtro puedes ver todas.</p>
       <% } %>
 
       <section class="results-meta">
@@ -80,9 +79,6 @@
           <p>Explorando cursos dentro de la categoría seleccionada.</p>
         <% } else { %>
           <p>Explora el catálogo o empieza por una sugerencia rápida.</p>
-        <% } %>
-        <% if (usingDemoData) { %>
-          <p class="demo-note">Mostrando el catálogo importado en modo fallback mientras la base de datos real no está conectada.</p>
         <% } %>
       </section>
 
@@ -110,9 +106,6 @@
                 <li><strong>Código:</strong> <%= course.course_code %></li>
                 <li><strong>Horas:</strong> <%= course.hours || '-' %></li>
                 <li><strong>Modalidad:</strong> <%= course.delivery_mode %></li>
-                <% if (typeof course.relevance_score !== 'undefined') { %>
-                  <li><strong>Relevancia:</strong> <%= course.relevance_score %></li>
-                <% } %>
               </ul>
             </div>
             <div class="card-actions">

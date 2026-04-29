@@ -1,8 +1,8 @@
 const targets = [
   { path: '/health', expectJson: { ok: true, app: 'up' } },
-  { path: '/', expect: ['Catálogo Inteligente', 'Pruebas rápidas'] },
+  { path: '/', expect: ['Catálogo Inteligente', 'Búsquedas sugeridas:'] },
   { path: '/cursos', expect: ['Catálogo de cursos online', 'cursos mostrados'] },
-  { path: '/estado-demo', expect: ['Estado de la demo', 'Qué está operativo ahora mismo'] },
+  { path: '/estado-demo', expectUrlIncludes: '/cursos' },
   { path: '/api/courses?limit=2&category=marketing', expectJson: { usingDemoData: true, minItems: 1 } },
   { path: '/api/categories', expectJson: { usingDemoData: true, minItems: 1 } },
 ];
@@ -17,6 +17,10 @@ async function checkTarget(target) {
   }
 
   const text = await response.text();
+
+  if (target.expectUrlIncludes && !response.url.includes(target.expectUrlIncludes)) {
+    throw new Error(`${target.path} no redirigió a ${target.expectUrlIncludes}`);
+  }
 
   if (target.expect) {
     for (const snippet of target.expect) {

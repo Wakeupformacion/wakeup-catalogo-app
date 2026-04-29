@@ -32,30 +32,17 @@
           </form>
           <% if (searchSuggestions && searchSuggestions.length) { %>
             <div class="hero-quick-searches">
-              <span>Pruebas rápidas:</span>
+              <span>Búsquedas sugeridas:</span>
               <% searchSuggestions.slice(0, 4).forEach(function(item) { %>
                 <a href="/cursos?q=<%= encodeURIComponent(item) %>" class="chip suggestion-chip"><%= item %></a>
               <% }) %>
             </div>
           <% } %>
-          <p class="helper-text hero-helper">Puedes validar búsqueda, navegación por categorías, ficha de curso y acceso directo a la API.</p>
+          <p class="helper-text hero-helper">Encuentra formación por temática, categoría o duración y accede a la ficha de cada curso.</p>
           <div class="hero-actions">
             <a class="button secondary" href="/cursos">Ver catálogo</a>
-            <a class="button ghost" href="/estado-demo">Ver estado</a>
-            <a class="button ghost" href="/api/courses" target="_blank" rel="noopener noreferrer">Ver API</a>
           </div>
         </div>
-      </section>
-
-      <section class="quick-proof-strip">
-        <article class="proof-card">
-          <strong>Qué puedes probar ahora</strong>
-          <p>Buscar por necesidad, filtrar por horas, entrar en una ficha y abrir el detalle oficial del curso.</p>
-        </article>
-        <article class="proof-card">
-          <strong>Qué demuestra esta demo</strong>
-          <p>Que ya existe una base válida para catálogo navegable, publicación rápida y evolución hacia buscador inteligente.</p>
-        </article>
       </section>
 
       <section class="stats-strip">
@@ -68,8 +55,8 @@
           <span>formación online</span>
         </article>
         <article>
-          <strong>IA-ready</strong>
-          <span>base preparada para buscador semántico</span>
+          <strong>Flexible</strong>
+          <span>búsqueda rápida por temática, categoría y horas</span>
         </article>
       </section>
 
@@ -109,40 +96,11 @@
 
       <section class="trust-section">
         <div class="section-heading">
-          <p class="eyebrow dark">Solidez del proyecto</p>
-          <h2>Una base pensada para catálogo real, no solo para maqueta</h2>
+          <p class="eyebrow dark">Por qué elegir WakeUp</p>
+          <h2>Una oferta formativa pensada para encontrar antes lo que necesitas</h2>
         </div>
         <div class="featured-grid">
           <% trustBlocks.forEach(function(item) { %>
-            <article class="featured-card">
-              <h3><%= item.title %></h3>
-              <p><%= item.text %></p>
-            </article>
-          <% }) %>
-        </div>
-      </section>
-
-      <section class="review-section">
-        <div class="section-heading">
-          <p class="eyebrow dark">Qué se puede revisar ya</p>
-          <h2>Puntos clave que esta demo ya deja claros</h2>
-        </div>
-        <div class="review-card">
-          <ul>
-            <% reviewPoints.forEach(function(item) { %>
-              <li><%= item %></li>
-            <% }) %>
-          </ul>
-        </div>
-      </section>
-
-      <section class="process-section">
-        <div class="section-heading">
-          <p class="eyebrow dark">Cómo funciona</p>
-          <h2>Del Excel a una experiencia de búsqueda más inteligente</h2>
-        </div>
-        <div class="featured-grid">
-          <% processSteps.forEach(function(item) { %>
             <article class="featured-card">
               <h3><%= item.title %></h3>
               <p><%= item.text %></p>
@@ -165,48 +123,6 @@
         </div>
       </section>
 
-      <section class="signals-section">
-        <div class="section-heading">
-          <p class="eyebrow dark">Señales de inteligencia</p>
-          <h2>Capacidades ya preparadas en el buscador</h2>
-        </div>
-        <div class="review-card">
-          <ul>
-            <% intelligenceSignals.forEach(function(item) { %>
-              <li><%= item %></li>
-            <% }) %>
-          </ul>
-        </div>
-      </section>
-
-      <section class="release-section">
-        <div class="section-heading">
-          <p class="eyebrow dark">Fases de evolución</p>
-          <h2>Cómo puede crecer esta solución</h2>
-        </div>
-        <div class="featured-grid">
-          <% releasePhases.forEach(function(item) { %>
-            <article class="featured-card">
-              <h3><%= item.title %></h3>
-              <p><%= item.text %></p>
-            </article>
-          <% }) %>
-        </div>
-      </section>
-
-      <section class="ops-section">
-        <div class="section-heading">
-          <p class="eyebrow dark">Checklist operativa</p>
-          <h2>Qué falta para tenerlo plenamente publicado y conectado</h2>
-        </div>
-        <div class="review-card">
-          <ul>
-            <% opsChecklist.forEach(function(item) { %>
-              <li><%= item %></li>
-            <% }) %>
-          </ul>
-        </div>
-      </section>
 
       <section class="faq-section">
         <div class="section-heading">
@@ -223,27 +139,13 @@
         </div>
       </section>
 
-      <section class="milestones-section">
-        <div class="section-heading">
-          <p class="eyebrow dark">Siguientes hitos</p>
-          <h2>Qué queda para pasar de demo sólida a solución publicada</h2>
-        </div>
-        <div class="review-card">
-          <ul>
-            <% demoNextMilestones.forEach(function(item) { %>
-              <li><%= item %></li>
-            <% }) %>
-          </ul>
-        </div>
-      </section>
-
       <section class="cta-band">
         <div>
-          <p class="eyebrow dark">Próxima evolución</p>
-          <h2><%= ctaFooter.title %></h2>
-          <p><%= ctaFooter.text %></p>
+          <p class="eyebrow dark">Explora el catálogo</p>
+          <h2>Encuentra la formación que mejor encaja con tu equipo o con tus objetivos.</h2>
+          <p>Accede al catálogo completo, filtra por categoría o duración y revisa el detalle de cada curso.</p>
         </div>
-        <a class="button" href="/cursos">Probar el catálogo</a>
+        <a class="button" href="/cursos">Ver cursos</a>
       </section>
     </main>
   </body>
