@@ -334,12 +334,12 @@ button, .button {
   gap: 10px;
 }
 .category-tile span {
-  font-weight: 800;
+  font-weight: 700;
   color: #0f172a;
   text-transform: uppercase;
   letter-spacing: 0.01em;
   line-height: 1.12;
-  font-size: 16px;
+  font-size: 15px;
 }
 .category-tile small {
   color: #64748b;
