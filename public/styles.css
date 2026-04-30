@@ -146,6 +146,11 @@ button, .button {
   color: #0f172a;
   border: 1px solid var(--brand-border);
 }
+.hero-search-button {
+  background: #e5e7eb;
+  color: var(--brand-red);
+  border: 1px solid #d1d5db;
+}
 .hero-quick-searches {
   display: flex;
   flex-wrap: wrap;
