@@ -450,7 +450,9 @@ app.post('/admin/import', requireAdmin, upload.single('catalogFile'), async (req
       return res.redirect('/admin/dashboard');
     }
     let imported = 0;
-    for (const row of rows) {
+    let skipped = 0;
+    const warnings = [];
+    for (const [index, row] of rows.entries()) {
       const course = normalizeCourseInput({
         course_code: row.course_code || row.codigo || row.code,
         title: row.title || row.titulo,
@@ -460,12 +462,17 @@ app.post('/admin/import', requireAdmin, upload.single('catalogFile'), async (req
         detail_url: row.detail_url || row.url || row.enlace,
         is_active: String(row.is_active || row.activo || 'true').toLowerCase() !== 'false',
       });
-      if (!course.title || !course.course_code) continue;
+      if (!course.title || !course.course_code) {
+        skipped += 1;
+        if (warnings.length < 5) warnings.push(`fila ${index + 2}: faltan código o título`);
+        continue;
+      }
       const ok = await safeAdminUpsertCourse(course);
       if (!ok) upsertFallbackCourse(course);
       imported += 1;
     }
-    setFlash(res, `Importación completada: ${imported} cursos procesados.`);
+    const warningText = warnings.length ? ` Avisos: ${warnings.join('; ')}${skipped > warnings.length ? '; ...' : ''}` : '';
+    setFlash(res, `Importación completada: ${imported} cursos procesados, ${skipped} omitidos.${warningText}`);
     return res.redirect('/admin/dashboard');
   } catch (error) {
     setFlash(res, `ERROR: ${error.message}`);
