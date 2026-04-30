@@ -54,22 +54,6 @@
         <% }) %>
       </section>
 
-      <section class="featured-section">
-        <div class="section-heading">
-          <p class="eyebrow dark">Áreas destacadas</p>
-          <h2>Categorías pensadas para encontrar antes la formación adecuada</h2>
-        </div>
-        <div class="featured-grid">
-          <% featuredCategories.forEach(function(item) { %>
-            <article class="featured-card">
-              <h3><%= item.title %></h3>
-              <p><%= item.description %></p>
-              <a href="/cursos?category=<%= item.slug %>" class="text-link">Explorar categoría →</a>
-            </article>
-          <% }) %>
-        </div>
-      </section>
-
       <% if (allCategories && allCategories.length) { %>
         <section class="all-categories-section">
           <div class="section-heading">
