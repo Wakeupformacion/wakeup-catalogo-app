@@ -520,6 +520,9 @@ button, .button {
   width: 100%;
   max-width: 420px;
 }
+.admin-search-panel {
+  margin-bottom: 18px;
+}
 .admin-inline-filter-form {
   display: flex;
   gap: 10px;
@@ -527,8 +530,15 @@ button, .button {
   flex-wrap: wrap;
   margin: 0 0 22px;
 }
+.admin-inline-filter-form-full {
+  margin: 0;
+}
 .admin-search-input-compact {
   max-width: 420px;
+}
+.admin-search-input-full {
+  max-width: none;
+  flex: 1 1 560px;
 }
 .admin-cards-list {
   display: grid;

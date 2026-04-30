@@ -83,6 +83,16 @@
         </article>
       </section>
 
+      <section class="card admin-panel admin-search-panel">
+        <form method="get" action="/admin/dashboard" class="admin-inline-filter-form admin-inline-filter-form-full">
+          <input type="search" name="q" value="<%= adminQuery || '' %>" class="admin-search-input admin-search-input-full" placeholder="Filtrar por código, título o categoría..." />
+          <button type="submit" class="button ghost">Buscar</button>
+          <% if (adminQuery) { %>
+            <a class="button ghost" href="/admin/dashboard">Limpiar</a>
+          <% } %>
+        </form>
+      </section>
+
       <section class="card admin-panel admin-panel-full">
         <div class="admin-list-toolbar">
           <div class="admin-list-toolbar-copy">
@@ -91,14 +101,6 @@
             <p class="helper-text">Página <%= currentPage %> de <%= totalPages %> · mostrando hasta <%= perPage %> cursos</p>
           </div>
         </div>
-
-        <form method="get" action="/admin/dashboard" class="admin-inline-filter-form">
-          <input type="search" name="q" value="<%= adminQuery || '' %>" class="admin-search-input admin-search-input-compact" placeholder="Filtrar por código, título o categoría..." />
-          <button type="submit" class="button ghost">Buscar</button>
-          <% if (adminQuery) { %>
-            <a class="button ghost" href="/admin/dashboard">Limpiar</a>
-          <% } %>
-        </form>
 
         <div class="admin-cards-list" id="adminCourseList">
           <% courses.forEach(function(course) { %>
