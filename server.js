@@ -384,8 +384,15 @@ app.get('/admin/dashboard', requireAdmin, async (req, res) => {
   `);
   const flash = clearFlash(req, res);
   const courses = result ? result.rows : readFallbackCourses().sort((a, b) => String(a.title).localeCompare(String(b.title), 'es')).slice(0, 300);
+  const stats = {
+    total: courses.length,
+    active: courses.filter((item) => item.is_active !== false).length,
+    inactive: courses.filter((item) => item.is_active === false).length,
+    withDetailUrl: courses.filter((item) => item.detail_url).length,
+  };
   return res.render('admin-dashboard', {
     courses,
+    stats,
     usingDemoData: !result,
     flash: flash && !flash.startsWith('ERROR:') ? flash : '',
     error: flash && flash.startsWith('ERROR:') ? flash.replace(/^ERROR:\s*/, '') : '',

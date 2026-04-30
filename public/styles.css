@@ -396,6 +396,25 @@ button, .button {
   gap: 18px;
   margin-bottom: 24px;
 }
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.admin-stat-card {
+  padding: 20px;
+}
+.admin-stat-card strong {
+  display: block;
+  font-size: 28px;
+  color: var(--brand-red);
+  margin-bottom: 6px;
+}
+.admin-stat-card span {
+  color: #64748b;
+  font-size: 14px;
+}
 .admin-panel-heading {
   margin-bottom: 14px;
 }
