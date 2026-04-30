@@ -51,26 +51,6 @@
         </section>
       <% } %>
 
-      <% if (searchSuggestions && searchSuggestions.length) { %>
-        <section class="chips-row suggestions-row">
-          <% searchSuggestions.forEach(function(item) { %>
-            <a href="/cursos?q=<%= encodeURIComponent(item) %>" class="chip suggestion-chip"><span><%= item %></span></a>
-          <% }) %>
-        </section>
-      <% } %>
-
-      <% if (categoryChips && categoryChips.length) { %>
-        <section class="chips-row">
-          <a href="/cursos" class="chip <%= !category ? 'active' : '' %>">Todas</a>
-          <% categoryChips.forEach(function(item) { %>
-            <a href="/cursos?category=<%= item.category_normalized %>" class="chip <%= item.isActive ? 'active' : '' %>">
-              <span><%= item.category_label %></span>
-              <small><%= item.total %></small>
-            </a>
-          <% }) %>
-        </section>
-      <% } %>
-
       <section class="results-meta">
         <p><strong><%= items.length %></strong> cursos mostrados</p>
         <% if (q) { %>
@@ -78,7 +58,7 @@
         <% } else if (category) { %>
           <p>Explorando cursos dentro de la categoría seleccionada.</p>
         <% } else { %>
-          <p>Explora el catálogo o empieza por una sugerencia rápida.</p>
+          <p>Explora el catálogo completo.</p>
         <% } %>
       </section>
 
