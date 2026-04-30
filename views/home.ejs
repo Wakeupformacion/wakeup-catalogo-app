@@ -14,7 +14,7 @@
           <p class="eyebrow">WakeUp · Formación online</p>
           <h1>Encuentra el curso que encaja con tus necesidades.</h1>
           <p class="lead">
-            Explora un catálogo online amplio, filtra con rapidez y prepárate para una experiencia de búsqueda inteligente orientada a necesidades formativas reales.
+            Explora un catálogo online claro, filtra con rapidez y accede a la ficha de cada curso de forma sencilla.
           </p>
           <div class="hero-badges">
             <% heroBadges.forEach(function(item) { %>
@@ -60,15 +60,6 @@
         </article>
       </section>
 
-      <section class="benefits-strip">
-        <% benefitsStrip.forEach(function(item) { %>
-          <article>
-            <span><%= item.label %></span>
-            <strong><%= item.value %></strong>
-          </article>
-        <% }) %>
-      </section>
-
       <section class="highlights">
         <% valueProps.forEach(function(item) { %>
           <article>
@@ -94,6 +85,23 @@
         </div>
       </section>
 
+      <% if (allCategories && allCategories.length) { %>
+        <section class="all-categories-section">
+          <div class="section-heading">
+            <p class="eyebrow dark">Todas las temáticas</p>
+            <h2>Explora el catálogo por categoría</h2>
+          </div>
+          <div class="all-categories-grid">
+            <% allCategories.forEach(function(item) { %>
+              <a href="/cursos?category=<%= item.category_normalized %>" class="category-tile">
+                <span><%= item.category_label %></span>
+                <small><%= item.total %> cursos</small>
+              </a>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
+
       <section class="trust-section">
         <div class="section-heading">
           <p class="eyebrow dark">Por qué elegir WakeUp</p>
@@ -109,35 +117,6 @@
         </div>
       </section>
 
-      <section class="usecases-section">
-        <div class="section-heading">
-          <p class="eyebrow dark">Casos de uso</p>
-          <h2>Qué resuelve esta solución en la práctica</h2>
-        </div>
-        <div class="review-card">
-          <ul>
-            <% useCases.forEach(function(item) { %>
-              <li><%= item %></li>
-            <% }) %>
-          </ul>
-        </div>
-      </section>
-
-
-      <section class="faq-section">
-        <div class="section-heading">
-          <p class="eyebrow dark">Preguntas clave</p>
-          <h2>Respuestas importantes para entender la solución</h2>
-        </div>
-        <div class="faq-grid">
-          <% faqDemo.forEach(function(item) { %>
-            <article class="featured-card">
-              <h3><%= item.question %></h3>
-              <p><%= item.answer %></p>
-            </article>
-          <% }) %>
-        </div>
-      </section>
 
       <section class="cta-band">
         <div>

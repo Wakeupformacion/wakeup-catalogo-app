@@ -1,14 +1,10 @@
 [
   {
-    "title": "Importación robusta del catálogo",
-    "text": "El sistema está preparado para leer el Excel original y conservar el enlace oficial de cada curso sin perder la ficha detallada."
+    "title": "Catálogo bien estructurado",
+    "text": "La información del catálogo se presenta de forma clara para facilitar la búsqueda y el acceso a cada ficha de curso."
   },
   {
-    "title": "Escalable para miles de cursos",
-    "text": "La arquitectura propuesta permite trabajar con un catálogo amplio sin depender de una gestión manual frágil."
-  },
-  {
-    "title": "Base lista para IA",
-    "text": "La búsqueda ya está evolucionada y preparada para avanzar a full-text y recomendación semántica."
+    "title": "Amplia oferta formativa",
+    "text": "La solución permite trabajar con un catálogo amplio de cursos online sin depender de una gestión manual frágil."
   }
 ]

@@ -30,12 +30,8 @@
 
       <section class="detail-card">
         <ul class="meta vertical">
-          <li><strong>Código:</strong> <%= course.course_code %></li>
           <li><strong>Horas:</strong> <%= course.hours || '-' %></li>
           <li><strong>Modalidad:</strong> <%= course.delivery_mode %></li>
-          <% if (course.relevance_score) { %>
-            <li><strong>Relevancia:</strong> <%= course.relevance_score %></li>
-          <% } %>
         </ul>
 
         <div class="detail-actions">
@@ -82,7 +78,7 @@
                 <h3><a href="/cursos/<%= item.slug %>"><%= item.title %></a></h3>
                 <p><strong><%= item.hours || '-' %></strong> horas · modalidad <%= item.delivery_mode %></p>
                 <div class="card-actions">
-                  <a class="button ghost" href="/cursos/<%= item.slug %>">Ver curso</a>
+                  <a class="button ghost" href="/cursos/<%= item.slug %>">Ver ficha</a>
                 </div>
               </article>
             <% }) %>

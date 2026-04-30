@@ -62,7 +62,7 @@ function getSampleCategories() {
         }, new Map())
         .values()
     )
-      .sort((a, b) => b.total - a.total || a.category_label.localeCompare(b.category_label, 'es'));
+      .sort((a, b) => a.category_label.localeCompare(b.category_label, 'es'));
   } catch (_error) {
     return loadJson('./data/categories.sample.json');
   }

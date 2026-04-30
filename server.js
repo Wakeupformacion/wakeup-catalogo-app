@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { pool } = require('./db');
-const { tokenize, extractHoursIntent, buildSearchWhere, buildRankingExpression } = require('./search');
+const { normalizeText, expandSearchTerms, tokenize, extractHoursIntent, buildSearchWhere, buildRankingExpression } = require('./search');
 const { getSampleCourses, getSampleCategories, getFeaturedCategories, getValueProps, getTrustBlocks, getReviewPoints, getFaqDemo, getProcessSteps, getUseCases, getBenefitsStrip, getIntelligenceSignals, getReleasePhases, getOpsChecklist, getHeroBadges, getEmptyStateTips, getCatalogMicrocopy, getCourseHighlights, getDemoNextMilestones, getCtaFooter, getSearchSuggestions } = require('./demo-data');
 const { buildCategoryChips } = require('./category-utils');
 const { getRelatedCourses } = require('./recommendations');
@@ -33,20 +33,21 @@ async function safeQuery(query, params = []) {
 function scoreDemoCourse(course, q) {
   if (!q) return 0;
 
-  const normalizedQ = q.toLowerCase();
-  const tokens = tokenize(q);
-  const title = String(course.title || '').toLowerCase();
-  const category = String(course.category_raw || '').toLowerCase();
-  const searchText = String(course.search_text || `${course.title || ''} ${course.category_raw || ''} ${course.course_code || ''}`).toLowerCase();
+  const normalizedQ = normalizeText(q);
+  const terms = expandSearchTerms(q);
+  const title = normalizeText(course.title || '');
+  const category = normalizeText(course.category_raw || '');
+  const searchText = normalizeText(course.search_text || `${course.title || ''} ${course.category_raw || ''} ${course.course_code || ''}`);
 
   let score = 0;
   if (title.includes(normalizedQ)) score += 25;
-  if (category.includes(normalizedQ)) score += 15;
+  if (category.includes(normalizedQ)) score += 20;
+  if (searchText.includes(normalizedQ)) score += 10;
 
-  for (const token of tokens) {
-    if (title.includes(token)) score += 8;
-    if (category.includes(token)) score += 4;
-    if (searchText.includes(token)) score += 2;
+  for (const term of terms) {
+    if (title.includes(term)) score += 8;
+    if (category.includes(term)) score += 6;
+    if (searchText.includes(term)) score += 3;
   }
 
   return score;
@@ -57,15 +58,11 @@ function getDemoCourses({ q, category, maxHours, limit, offset }) {
     .filter((course) => course.is_active !== false)
     .filter((course) => !category || course.category_normalized === category)
     .filter((course) => !Number.isFinite(maxHours) || (course.hours && course.hours <= maxHours))
-    .filter((course) => {
-      if (!q) return true;
-      const haystack = `${course.title || ''} ${course.category_raw || ''} ${course.course_code || ''} ${course.search_text || ''}`.toLowerCase();
-      return tokenize(q).every((token) => haystack.includes(token));
-    })
     .map((course) => ({
       ...course,
       relevance_score: scoreDemoCourse(course, q),
     }))
+    .filter((course) => !q || course.relevance_score > 0)
     .sort((a, b) => b.relevance_score - a.relevance_score || String(a.title || '').localeCompare(String(b.title || ''), 'es'));
 
   return {
@@ -81,14 +78,24 @@ app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json());
 app.use(express.static(__dirname + '/public'));
 
-app.get('/', (_req, res) => {
+app.get('/', async (_req, res) => {
+  const categoryResult = await safeQuery(`
+    select category_normalized, min(category_raw) as category_label, count(*)::int as total
+    from courses
+    where is_active = true
+    group by category_normalized
+    order by category_label asc
+  `);
+  const allCategories = categoryResult ? categoryResult.rows : getSampleCategories();
+
   res.render('home', {
     pageMeta: buildPageMeta({
-      title: 'WakeUp · Catálogo Inteligente',
-      description: 'Explora el catálogo inteligente de WakeUp: cursos online, filtros por necesidad formativa y una base lista para evolucionar hacia búsqueda avanzada.',
+      title: 'WakeUp · Catálogo online',
+      description: 'Explora el catálogo online de WakeUp: cursos, categorías y acceso claro a la ficha de cada formación.',
       path: '/',
     }),
     featuredCategories: getFeaturedCategories(),
+    allCategories,
     valueProps: getValueProps(),
     trustBlocks: getTrustBlocks(),
     reviewPoints: getReviewPoints(),

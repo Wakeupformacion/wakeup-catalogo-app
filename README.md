@@ -74,4 +74,5 @@ Esto intenta:
 - existe modo demo cuando no hay PostgreSQL disponible
 - el fallback ya queda dentro de esta carpeta para publicar la demo sin depender de rutas externas
 - `boot.js` permite intentar carga automática cuando la base responde
+- siguiente requisito funcional relevante: acceso administrador con usuario/contraseña para cargar y actualizar el catálogo desde un área privada
 - ya está preparada la base para full-text real y futura búsqueda semántica

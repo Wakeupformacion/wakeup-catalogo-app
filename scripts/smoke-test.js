@@ -1,6 +1,6 @@
 const targets = [
   { path: '/health', expectJson: { ok: true, app: 'up' } },
-  { path: '/', expect: ['Catálogo Inteligente', 'Búsquedas sugeridas:'] },
+  { path: '/', expect: ['Catálogo online', 'Búsquedas sugeridas:'] },
   { path: '/cursos', expect: ['Catálogo de cursos online', 'cursos mostrados'] },
   { path: '/estado-demo', expectUrlIncludes: '/cursos' },
   { path: '/api/courses?limit=2&category=marketing', expectJson: { usingDemoData: true, minItems: 1 } },
