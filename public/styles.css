@@ -283,53 +283,67 @@ button, .button {
 .all-categories-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 18px;
+  gap: 20px;
 }
 .featured-card h3 { margin-top: 0; }
 .related-section { margin-top: 32px; }
 .all-categories-section { margin-top: 32px; }
 .category-tile {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid #e5e7eb;
-  border-radius: 20px;
-  padding: 18px 20px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+  border-radius: 22px;
+  padding: 20px 22px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  min-height: 118px;
+  min-height: 122px;
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
+.category-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--brand-red), #e8798d);
+  opacity: .9;
+}
 .category-tile:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
   border-color: var(--brand-border);
 }
 .category-tile-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: var(--brand-red-soft);
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fff1f3 0%, var(--brand-red-soft) 100%);
+  border: 1px solid var(--brand-border);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
   flex: 0 0 auto;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
 }
 .category-tile-content {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 .category-tile span {
-  font-weight: 700;
+  font-weight: 800;
   color: #0f172a;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 1.15;
+  letter-spacing: 0.015em;
+  line-height: 1.12;
+  font-size: 22px;
 }
 .category-tile small {
   color: #64748b;
+  font-size: 14px;
 }
 .text-link { color: var(--brand-red); font-weight: 700; }
 .review-card {
