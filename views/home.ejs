@@ -53,9 +53,25 @@
           </div>
           <div class="all-categories-grid">
             <% allCategories.forEach(function(item) { %>
+              <% const label = String(item.category_label || '').toLowerCase(); %>
+              <% let categoryIcon = '📘'; %>
+              <% if (label.includes('admin') || label.includes('contabil') || label.includes('finan')) { categoryIcon = '📊'; } %>
+              <% else if (label.includes('comercial') || label.includes('venta') || label.includes('cliente')) { categoryIcon = '🤝'; } %>
+              <% else if (label.includes('diseño') || label.includes('arte') || label.includes('graf')) { categoryIcon = '🎨'; } %>
+              <% else if (label.includes('digital') || label.includes('tic') || label.includes('inform')) { categoryIcon = '💻'; } %>
+              <% else if (label.includes('constru') || label.includes('obra') || label.includes('edific')) { categoryIcon = '🏗️'; } %>
+              <% else if (label.includes('electric') || label.includes('mec')) { categoryIcon = '⚙️'; } %>
+              <% else if (label.includes('agrar') || label.includes('fitosan') || label.includes('alimenta')) { categoryIcon = '🌿'; } %>
+              <% else if (label.includes('educ')) { categoryIcon = '🎓'; } %>
+              <% else if (label.includes('agencia') || label.includes('viaj')) { categoryIcon = '✈️'; } %>
+              <% else if (label.includes('farm')) { categoryIcon = '💊'; } %>
+              <% else if (label.includes('energia') || label.includes('renovable')) { categoryIcon = '⚡'; } %>
               <a href="/cursos?category=<%= item.category_normalized %>" class="category-tile">
-                <span><%= item.category_label %></span>
-                <small><%= item.total %> cursos</small>
+                <div class="category-tile-icon" aria-hidden="true"><%= categoryIcon %></div>
+                <div class="category-tile-content">
+                  <span><%= item.category_label %></span>
+                  <small><%= item.total %> cursos</small>
+                </div>
               </a>
             <% }) %>
           </div>
