@@ -54,48 +54,61 @@
 
       <section class="card admin-panel">
         <div class="admin-list-header">
-          <h2>Cursos</h2>
-          <p class="helper-text"><%= courses.length %> cursos cargados</p>
+          <div>
+            <h2>Cursos</h2>
+            <p class="helper-text"><%= courses.length %> cursos cargados</p>
+          </div>
+          <input type="search" id="adminCourseFilter" class="admin-search-input" placeholder="Filtrar por código, título o categoría..." />
         </div>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Título</th>
-                <th>Categoría</th>
-                <th>Horas</th>
-                <th>Modalidad</th>
-                <th>Activo</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% courses.forEach(function(course) { %>
-                <tr>
-                  <form method="post" action="/admin/courses/<%= course.slug %>">
-                    <td><input type="text" name="course_code" value="<%= course.course_code %>" required /></td>
-                    <td><input type="text" name="title" value="<%= course.title %>" required /></td>
-                    <td><input type="text" name="category_raw" value="<%= course.category_raw || '' %>" required /></td>
-                    <td><input type="number" name="hours" min="1" value="<%= course.hours || '' %>" /></td>
-                    <td><input type="text" name="delivery_mode" value="<%= course.delivery_mode || 'online' %>" /></td>
-                    <td><input type="checkbox" name="is_active" <%= course.is_active !== false ? 'checked' : '' %> /></td>
-                    <td>
-                      <input type="url" name="detail_url" value="<%= course.detail_url || '' %>" placeholder="URL detalle" />
-                      <div class="admin-inline-actions">
-                        <button type="submit">Guardar</button>
+
+        <div class="admin-cards-list" id="adminCourseList">
+          <% courses.forEach(function(course) { %>
+            <article class="admin-course-card" data-search="<%= [course.course_code, course.title, course.category_raw].filter(Boolean).join(' ').toLowerCase() %>">
+              <div class="admin-course-head">
+                <div>
+                  <p class="admin-course-code"><%= course.course_code %></p>
+                  <h3><%= course.title %></h3>
+                  <p class="admin-course-meta"><%= course.category_raw || 'Sin categoría' %> · <%= course.hours || '-' %> horas · <%= course.delivery_mode || 'online' %></p>
+                </div>
+                <span class="admin-status-pill <%= course.is_active !== false ? 'is-active' : 'is-inactive' %>">
+                  <%= course.is_active !== false ? 'Activo' : 'Inactivo' %>
+                </span>
+              </div>
+
+              <form method="post" action="/admin/courses/<%= course.slug %>" class="admin-form-grid admin-edit-form">
+                <label><span>Código</span><input type="text" name="course_code" value="<%= course.course_code %>" required /></label>
+                <label><span>Título</span><input type="text" name="title" value="<%= course.title %>" required /></label>
+                <label><span>Categoría</span><input type="text" name="category_raw" value="<%= course.category_raw || '' %>" required /></label>
+                <label><span>Horas</span><input type="number" name="hours" min="1" value="<%= course.hours || '' %>" /></label>
+                <label><span>Modalidad</span><input type="text" name="delivery_mode" value="<%= course.delivery_mode || 'online' %>" /></label>
+                <label><span>URL detalle</span><input type="url" name="detail_url" value="<%= course.detail_url || '' %>" placeholder="URL detalle" /></label>
+                <label class="checkbox-label"><input type="checkbox" name="is_active" <%= course.is_active !== false ? 'checked' : '' %> /> <span>Activo</span></label>
+                <div class="admin-inline-actions admin-actions-row">
+                  <button type="submit">Guardar cambios</button>
+              </form>
+                  <form method="post" action="/admin/courses/<%= course.slug %>/delete" onsubmit="return confirm('¿Eliminar este curso?');">
+                    <button type="submit" class="button ghost">Eliminar</button>
                   </form>
-                        <form method="post" action="/admin/courses/<%= course.slug %>/delete" onsubmit="return confirm('¿Eliminar este curso?');">
-                          <button type="submit" class="button ghost">Eliminar</button>
-                        </form>
-                      </div>
-                    </td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
+                </div>
+            </article>
+          <% }) %>
         </div>
       </section>
     </main>
+
+    <script>
+      (function () {
+        const input = document.getElementById('adminCourseFilter');
+        const items = Array.from(document.querySelectorAll('#adminCourseList .admin-course-card'));
+        if (!input || !items.length) return;
+        input.addEventListener('input', function () {
+          const q = String(input.value || '').trim().toLowerCase();
+          items.forEach(function (item) {
+            const haystack = item.getAttribute('data-search') || '';
+            item.style.display = !q || haystack.includes(q) ? '' : 'none';
+          });
+        });
+      })();
+    </script>
   </body>
 </html>

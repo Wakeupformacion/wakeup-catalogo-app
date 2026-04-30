@@ -430,26 +430,62 @@ button, .button {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  align-items: baseline;
+  align-items: end;
+  margin-bottom: 18px;
 }
-.admin-table-wrap {
-  overflow: auto;
+.admin-search-input {
+  max-width: 360px;
 }
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
+.admin-cards-list {
+  display: grid;
+  gap: 18px;
 }
-.admin-table th,
-.admin-table td {
-  text-align: left;
-  padding: 10px;
-  border-bottom: 1px solid #e5e7eb;
-  vertical-align: top;
+.admin-course-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 20px;
+  background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
 }
-.admin-table input[type="text"],
-.admin-table input[type="number"],
-.admin-table input[type="url"] {
-  min-width: 140px;
+.admin-course-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.admin-course-head h3 {
+  margin: 4px 0 6px;
+  font-size: 22px;
+}
+.admin-course-code {
+  margin: 0;
+  color: var(--brand-red);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.admin-course-meta {
+  margin: 0;
+  color: #64748b;
+}
+.admin-status-pill {
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.admin-status-pill.is-active {
+  background: #ecfdf5;
+  color: #166534;
+}
+.admin-status-pill.is-inactive {
+  background: #fef2f2;
+  color: #991b1b;
+}
+.admin-edit-form {
+  margin-top: 10px;
 }
 .admin-inline-actions {
   display: flex;
@@ -477,6 +513,8 @@ button, .button {
   .card-inline-button { white-space: normal; width: 100%; }
   .cta-band { flex-direction: column; align-items: flex-start; }
   .admin-topbar,
-  .admin-list-header { flex-direction: column; align-items: flex-start; }
+  .admin-list-header,
+  .admin-course-head { flex-direction: column; align-items: flex-start; }
+  .admin-search-input { max-width: 100%; width: 100%; }
   .admin-form-grid { grid-template-columns: 1fr; }
 }
