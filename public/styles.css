@@ -380,8 +380,27 @@ button, .button {
   padding: 32px;
 }
 .admin-auth-card {
-  max-width: 560px;
+  max-width: 940px;
   margin: 40px auto 0;
+}
+.admin-auth-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  gap: 28px;
+  align-items: start;
+}
+.admin-auth-copy h1 {
+  margin: 6px 0 10px;
+  font-size: 54px;
+  line-height: 0.98;
+}
+.admin-auth-copy .helper-text {
+  max-width: 420px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.admin-auth-form-wrap {
+  width: 100%;
 }
 .admin-topbar {
   display: flex;
@@ -634,6 +653,8 @@ button, .button {
   .admin-topbar,
   .admin-list-toolbar,
   .admin-course-head { flex-direction: column; align-items: flex-start; }
+  .admin-auth-layout { grid-template-columns: 1fr; }
+  .admin-auth-copy h1 { font-size: 40px; line-height: 1.02; }
   .admin-search-input,
   .admin-search-input-compact { max-width: 100%; width: 100%; }
   .admin-inline-filter-form { align-items: stretch; }

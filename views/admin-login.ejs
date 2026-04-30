@@ -10,23 +10,29 @@
     <%- include('partials-header') %>
     <main class="page admin-page">
       <section class="admin-auth-card card">
-        <p class="eyebrow dark">Administración</p>
-        <h1>Acceso al panel</h1>
-        <p class="helper-text">Desde aquí podrás mantener el catálogo manualmente, editar cursos o cargar un fichero Excel/CSV.</p>
-        <% if (error) { %>
-          <p class="admin-error"><%= error %></p>
-        <% } %>
-        <form method="post" action="/admin/login" class="admin-form-stack">
-          <label>
-            <span>Usuario</span>
-            <input type="text" name="username" required />
-          </label>
-          <label>
-            <span>Contraseña</span>
-            <input type="password" name="password" required />
-          </label>
-          <button type="submit">Entrar</button>
-        </form>
+        <div class="admin-auth-layout">
+          <div class="admin-auth-copy">
+            <p class="eyebrow dark">Administración</p>
+            <h1>Acceso al panel</h1>
+            <p class="helper-text">Gestiona el catálogo, edita cursos y carga ficheros Excel o CSV desde este acceso.</p>
+          </div>
+          <div class="admin-auth-form-wrap">
+            <% if (error) { %>
+              <p class="admin-error"><%= error %></p>
+            <% } %>
+            <form method="post" action="/admin/login" class="admin-form-stack">
+              <label>
+                <span>Usuario</span>
+                <input type="text" name="username" required />
+              </label>
+              <label>
+                <span>Contraseña</span>
+                <input type="password" name="password" required />
+              </label>
+              <button type="submit">Entrar</button>
+            </form>
+          </div>
+        </div>
       </section>
     </main>
   </body>
