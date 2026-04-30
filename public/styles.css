@@ -377,7 +377,7 @@ button, .button {
 }
 .admin-auth-card,
 .admin-panel {
-  padding: 28px;
+  padding: 32px;
 }
 .admin-auth-card {
   max-width: 560px;
@@ -391,13 +391,20 @@ button, .button {
   margin-bottom: 20px;
 }
 .admin-stack {
-  display: grid;
-  gap: 18px;
-  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 32px;
 }
 .admin-panel-wide,
 .admin-panel-full {
   width: 100%;
+}
+.admin-panel-wide {
+  max-width: 860px;
+}
+.admin-panel-full {
+  margin-top: 10px;
 }
 .admin-export-row {
   display: flex;
@@ -425,10 +432,11 @@ button, .button {
   font-size: 14px;
 }
 .admin-panel-heading {
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 .admin-panel-heading h2 {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
+  font-size: 26px;
 }
 .admin-panel-heading .helper-text {
   margin: 0;
@@ -498,7 +506,9 @@ button, .button {
   justify-content: space-between;
   gap: 16px;
   align-items: end;
-  margin-bottom: 18px;
+  margin-bottom: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e5e7eb;
 }
 .admin-list-header h2 {
   margin: 0 0 6px;
