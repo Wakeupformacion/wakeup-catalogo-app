@@ -501,20 +501,24 @@ button, .button {
   color: #991b1b;
   border: 1px solid #fecaca;
 }
-.admin-list-header {
+.admin-list-toolbar {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: 20px;
   align-items: end;
   margin-bottom: 24px;
   padding-bottom: 14px;
   border-bottom: 1px solid #e5e7eb;
 }
-.admin-list-header h2 {
-  margin: 0 0 6px;
+.admin-list-toolbar-copy h2 {
+  margin: 4px 0 6px;
+}
+.admin-list-toolbar-copy .helper-text {
+  margin: 0;
 }
 .admin-search-input {
-  max-width: 360px;
+  width: 100%;
+  max-width: 420px;
 }
 .admin-cards-list {
   display: grid;
@@ -595,7 +599,7 @@ button, .button {
   .card-inline-button { white-space: normal; width: 100%; }
   .cta-band { flex-direction: column; align-items: flex-start; }
   .admin-topbar,
-  .admin-list-header,
+  .admin-list-toolbar,
   .admin-course-head { flex-direction: column; align-items: flex-start; }
   .admin-search-input { max-width: 100%; width: 100%; }
   .admin-form-grid { grid-template-columns: 1fr; }
