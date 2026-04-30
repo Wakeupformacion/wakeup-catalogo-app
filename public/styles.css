@@ -329,6 +329,94 @@ button, .button {
   gap: 12px;
   flex-wrap: wrap;
 }
+.admin-page {
+  max-width: 1240px;
+}
+.admin-auth-card,
+.admin-panel {
+  padding: 28px;
+}
+.admin-topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.admin-form-stack,
+.admin-form-grid {
+  display: grid;
+  gap: 14px;
+}
+.admin-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.admin-form-stack label,
+.admin-form-grid label {
+  display: grid;
+  gap: 6px;
+}
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+}
+.admin-success,
+.admin-error {
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+.admin-success {
+  background: #ecfdf5;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+.admin-error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+.admin-list-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: baseline;
+}
+.admin-table-wrap {
+  overflow: auto;
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+.admin-table input[type="text"],
+.admin-table input[type="number"],
+.admin-table input[type="url"] {
+  min-width: 140px;
+}
+.admin-inline-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.admin-actions-row {
+  grid-column: 1 / -1;
+}
 @media (max-width: 760px) {
   .site-header-inner { flex-direction: column; align-items: flex-start; }
   .site-nav { flex-wrap: wrap; gap: 12px; }
@@ -345,4 +433,7 @@ button, .button {
   .card-title-row { flex-direction: column; align-items: flex-start; }
   .card-inline-button { white-space: normal; width: 100%; }
   .cta-band { flex-direction: column; align-items: flex-start; }
+  .admin-topbar,
+  .admin-list-header { flex-direction: column; align-items: flex-start; }
+  .admin-form-grid { grid-template-columns: 1fr; }
 }

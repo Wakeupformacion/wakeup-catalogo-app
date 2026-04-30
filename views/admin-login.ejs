@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin · WakeUp</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <%- include('partials-header') %>
+    <main class="page admin-page">
+      <section class="admin-auth-card">
+        <p class="eyebrow dark">Administración</p>
+        <h1>Acceso al panel</h1>
+        <p class="helper-text">Desde aquí podrás mantener el catálogo manualmente o cargar un fichero de cursos.</p>
+        <% if (error) { %>
+          <p class="admin-error"><%= error %></p>
+        <% } %>
+        <form method="post" action="/admin/login" class="admin-form-stack">
+          <label>
+            <span>Usuario</span>
+            <input type="text" name="username" required />
+          </label>
+          <label>
+            <span>Contraseña</span>
+            <input type="password" name="password" required />
+          </label>
+          <button type="submit">Entrar</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

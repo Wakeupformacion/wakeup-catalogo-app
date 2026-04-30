@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel admin · WakeUp</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <%- include('partials-header') %>
+    <main class="page admin-page">
+      <section class="admin-topbar">
+        <div>
+          <p class="eyebrow dark">Administración</p>
+          <h1>Mantenimiento del catálogo</h1>
+          <p class="helper-text">Estado: <strong><%= usingDemoData ? 'modo fallback' : 'base de datos' %></strong></p>
+        </div>
+        <form method="post" action="/admin/logout">
+          <button class="button ghost" type="submit">Salir</button>
+        </form>
+      </section>
+
+      <% if (flash) { %>
+        <p class="admin-success"><%= flash %></p>
+      <% } %>
+      <% if (error) { %>
+        <p class="admin-error"><%= error %></p>
+      <% } %>
+
+      <section class="admin-grid">
+        <article class="card admin-panel">
+          <h2>Nuevo curso</h2>
+          <form method="post" action="/admin/courses" class="admin-form-grid">
+            <label><span>Código</span><input type="text" name="course_code" required /></label>
+            <label><span>Título</span><input type="text" name="title" required /></label>
+            <label><span>Categoría</span><input type="text" name="category_raw" required /></label>
+            <label><span>Horas</span><input type="number" name="hours" min="1" /></label>
+            <label><span>Modalidad</span><input type="text" name="delivery_mode" value="online" /></label>
+            <label><span>URL detalle</span><input type="url" name="detail_url" /></label>
+            <label class="checkbox-label"><input type="checkbox" name="is_active" checked /> <span>Activo</span></label>
+            <div class="admin-actions-row"><button type="submit">Crear curso</button></div>
+          </form>
+        </article>
+
+        <article class="card admin-panel">
+          <h2>Carga de Excel/CSV</h2>
+          <p class="helper-text">Acepta CSV delimitado por comas o punto y coma y también ficheros Excel `.xlsx`.</p>
+          <form method="post" action="/admin/import" enctype="multipart/form-data" class="admin-form-stack">
+            <label><span>Fichero</span><input type="file" name="catalogFile" accept=".csv,.txt,.xlsx" required /></label>
+            <button type="submit">Cargar catálogo</button>
+          </form>
+        </article>
+      </section>
+
+      <section class="card admin-panel">
+        <div class="admin-list-header">
+          <h2>Cursos</h2>
+          <p class="helper-text"><%= courses.length %> cursos cargados</p>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Título</th>
+                <th>Categoría</th>
+                <th>Horas</th>
+                <th>Modalidad</th>
+                <th>Activo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% courses.forEach(function(course) { %>
+                <tr>
+                  <form method="post" action="/admin/courses/<%= course.slug %>">
+                    <td><input type="text" name="course_code" value="<%= course.course_code %>" required /></td>
+                    <td><input type="text" name="title" value="<%= course.title %>" required /></td>
+                    <td><input type="text" name="category_raw" value="<%= course.category_raw || '' %>" required /></td>
+                    <td><input type="number" name="hours" min="1" value="<%= course.hours || '' %>" /></td>
+                    <td><input type="text" name="delivery_mode" value="<%= course.delivery_mode || 'online' %>" /></td>
+                    <td><input type="checkbox" name="is_active" <%= course.is_active !== false ? 'checked' : '' %> /></td>
+                    <td>
+                      <input type="url" name="detail_url" value="<%= course.detail_url || '' %>" placeholder="URL detalle" />
+                      <div class="admin-inline-actions">
+                        <button type="submit">Guardar</button>
+                  </form>
+                        <form method="post" action="/admin/courses/<%= course.slug %>/delete" onsubmit="return confirm('¿Eliminar este curso?');">
+                          <button type="submit" class="button ghost">Eliminar</button>
+                        </form>
+                      </div>
+                    </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

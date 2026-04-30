@@ -1,22 +1,26 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
+const { randomUUID } = require('crypto');
 const { pool } = require('./db');
-const { normalizeText, expandSearchTerms, tokenize, extractHoursIntent, buildSearchWhere, buildRankingExpression } = require('./search');
+const { normalizeText, expandSearchTerms, extractHoursIntent, buildSearchWhere, buildRankingExpression } = require('./search');
 const { getSampleCourses, getSampleCategories, getFeaturedCategories, getValueProps, getTrustBlocks, getReviewPoints, getFaqDemo, getProcessSteps, getUseCases, getBenefitsStrip, getIntelligenceSignals, getReleasePhases, getOpsChecklist, getHeroBadges, getEmptyStateTips, getCatalogMicrocopy, getCourseHighlights, getDemoNextMilestones, getCtaFooter, getSearchSuggestions } = require('./demo-data');
 const { buildCategoryChips } = require('./category-utils');
 const { getRelatedCourses } = require('./recommendations');
 const { toTsQueryTokens } = require('./fulltext');
-const { buildStatus } = require('./status-data');
 const { buildCourseNav } = require('./navigation-utils');
+const { uploadsDir, ensureUploadsDir, parseCookies, createAdminSession, verifyAdminSession, getAdminAuthConfig, normalizeCourseInput, buildSearchText, readFallbackCourses, writeFallbackCourses, parseDelimitedText, parseExcelFile } = require('./admin-utils');
 
 const appBaseUrl = (process.env.APP_BASE_URL || 'https://wakeup-catalogo-app.onrender.com').replace(/\/$/, '');
 
-function buildPageMeta({ title, description, path = '/', image = '/WakeUpLogo.png', type = 'website' }) {
+function buildPageMeta({ title, description, path: pagePath = '/', image = '/WakeUpLogo.png', type = 'website' }) {
   return {
     title,
     description,
-    canonicalUrl: `${appBaseUrl}${path.startsWith('/') ? path : `/${path}`}`,
+    canonicalUrl: `${appBaseUrl}${pagePath.startsWith('/') ? pagePath : `/${pagePath}`}`,
     imageUrl: image.startsWith('http') ? image : `${appBaseUrl}${image.startsWith('/') ? image : `/${image}`}`,
     type,
   };
@@ -25,14 +29,13 @@ function buildPageMeta({ title, description, path = '/', image = '/WakeUpLogo.pn
 async function safeQuery(query, params = []) {
   try {
     return await pool.query(query, params);
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }
 
 function scoreDemoCourse(course, q) {
   if (!q) return 0;
-
   const normalizedQ = normalizeText(q);
   const terms = expandSearchTerms(q);
   const title = normalizeText(course.title || '');
@@ -58,10 +61,7 @@ function getDemoCourses({ q, category, maxHours, limit, offset }) {
     .filter((course) => course.is_active !== false)
     .filter((course) => !category || course.category_normalized === category)
     .filter((course) => !Number.isFinite(maxHours) || (course.hours && course.hours <= maxHours))
-    .map((course) => ({
-      ...course,
-      relevance_score: scoreDemoCourse(course, q),
-    }))
+    .map((course) => ({ ...course, relevance_score: scoreDemoCourse(course, q) }))
     .filter((course) => !q || course.relevance_score > 0)
     .sort((a, b) => b.relevance_score - a.relevance_score || String(a.title || '').localeCompare(String(b.title || ''), 'es'));
 
@@ -71,11 +71,104 @@ function getDemoCourses({ q, category, maxHours, limit, offset }) {
   };
 }
 
+function setFlash(res, message) {
+  res.setHeader('Set-Cookie', `admin_flash=${encodeURIComponent(message)}; Path=/; HttpOnly; SameSite=Lax`);
+}
+
+function clearFlash(req, res) {
+  const message = req.cookies.admin_flash ? decodeURIComponent(req.cookies.admin_flash) : '';
+  if (req.cookies.admin_flash) {
+    res.append('Set-Cookie', 'admin_flash=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
+  }
+  return message;
+}
+
+function requireAdmin(req, res, next) {
+  const config = getAdminAuthConfig();
+  const username = verifyAdminSession(req.cookies.admin_session, config.secret);
+  if (!username) return res.redirect('/admin');
+  req.adminUser = username;
+  next();
+}
+
+async function safeAdminUpsertCourse(course, existingSlug = null) {
+  const searchText = buildSearchText(course);
+  const result = await safeQuery('select id from courses where slug = $1 limit 1', [existingSlug || course.slug]);
+  if (!result) return false;
+
+  if (result.rows.length) {
+    await pool.query(
+      `update courses set
+        course_code = $2,
+        title = $3,
+        title_normalized = $4,
+        slug = $5,
+        category_raw = $6,
+        category_normalized = $7,
+        hours = $8,
+        delivery_mode = $9,
+        detail_url = $10,
+        language = $11,
+        is_active = $12,
+        search_text = $13,
+        search_vector =
+          setweight(to_tsvector('simple', coalesce($3, '')), 'A') ||
+          setweight(to_tsvector('simple', coalesce($6, '')), 'B') ||
+          setweight(to_tsvector('simple', coalesce($13, '')), 'C'),
+        updated_at = now()
+      where slug = $1`,
+      [existingSlug || course.slug, course.course_code, course.title, course.title_normalized, course.slug, course.category_raw, course.category_normalized, course.hours, course.delivery_mode, course.detail_url, course.language, course.is_active, searchText]
+    );
+  } else {
+    await pool.query(
+      `insert into courses (
+        id, source_file, source_sheet, source_row_number, import_batch_id,
+        course_code, title, title_normalized, slug,
+        category_raw, category_normalized, hours, delivery_mode,
+        detail_url, language, is_active, search_text, search_vector, embedding_status
+      ) values (
+        $1, 'admin-manual', 'manual', 0, null,
+        $2, $3, $4, $5,
+        $6, $7, $8, $9,
+        $10, $11, $12, $13,
+        setweight(to_tsvector('simple', coalesce($3, '')), 'A') ||
+        setweight(to_tsvector('simple', coalesce($6, '')), 'B') ||
+        setweight(to_tsvector('simple', coalesce($13, '')), 'C'),
+        'pending'
+      )`,
+      [randomUUID(), course.course_code, course.title, course.title_normalized, course.slug, course.category_raw, course.category_normalized, course.hours, course.delivery_mode, course.detail_url, course.language, course.is_active, searchText]
+    );
+  }
+
+  return true;
+}
+
+function upsertFallbackCourse(course, existingSlug = null) {
+  const items = readFallbackCourses();
+  const idx = items.findIndex((item) => item.slug === (existingSlug || course.slug));
+  const nextItem = { ...items[idx], ...course, search_text: buildSearchText(course) };
+  if (idx >= 0) items[idx] = nextItem;
+  else items.unshift(nextItem);
+  writeFallbackCourses(items);
+}
+
+function deleteFallbackCourse(slug) {
+  const items = readFallbackCourses().filter((item) => item.slug !== slug);
+  writeFallbackCourses(items);
+}
+
 const app = express();
+ensureUploadsDir();
+const upload = multer({ dest: uploadsDir });
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use((req, _res, next) => {
+  req.cookies = parseCookies(req.headers.cookie || '');
+  next();
+});
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', async (_req, res) => {
@@ -154,7 +247,6 @@ app.get('/cursos', async (req, res) => {
     const result = await safeQuery(sql, values);
     const demoResult = result ? null : getDemoCourses({ q, category, maxHours, limit, offset });
     const items = result ? result.rows : demoResult.items;
-    let categories = [];
     const categoryResult = await safeQuery(`
       select category_normalized, min(category_raw) as category_label, count(*)::int as total
       from courses
@@ -162,7 +254,7 @@ app.get('/cursos', async (req, res) => {
       group by category_normalized
       order by total desc, category_label asc
     `);
-    categories = categoryResult ? categoryResult.rows : getSampleCategories();
+    const categories = categoryResult ? categoryResult.rows : getSampleCategories();
     const topCategories = categories.slice(0, 8);
     const activeCategoryLabel = categories.find((item) => item.category_normalized === category)?.category_label || '';
 
@@ -203,9 +295,7 @@ app.get('/cursos', async (req, res) => {
   }
 });
 
-app.get('/estado-demo', (_req, res) => {
-  return res.redirect('/cursos');
-});
+app.get('/estado-demo', (_req, res) => res.redirect('/cursos'));
 
 app.get('/cursos/:slug', async (req, res) => {
   try {
@@ -215,9 +305,7 @@ app.get('/cursos/:slug', async (req, res) => {
       [req.params.slug]
     );
     const course = result?.rows?.[0] || getSampleCourses().find((item) => item.slug === req.params.slug);
-    if (!course) {
-      return res.status(404).send('Curso no encontrado');
-    }
+    if (!course) return res.status(404).send('Curso no encontrado');
 
     const relatedResult = await safeQuery(
       `select id, course_code, title, slug, category_raw, category_normalized, hours, delivery_mode, detail_url
@@ -262,6 +350,129 @@ app.get('/health', async (_req, res) => {
   });
 });
 
+app.get('/admin', (req, res) => {
+  const flash = clearFlash(req, res);
+  return res.render('admin-login', {
+    error: flash && flash.startsWith('ERROR:') ? flash.replace(/^ERROR:\s*/, '') : '',
+  });
+});
+
+app.post('/admin/login', (req, res) => {
+  const config = getAdminAuthConfig();
+  const { username, password } = req.body;
+  if (!config.password) return res.status(500).send('Configura ADMIN_USERNAME y ADMIN_PASSWORD para habilitar el admin.');
+  if (username !== config.username || password !== config.password) {
+    setFlash(res, 'ERROR: Credenciales incorrectas.');
+    return res.redirect('/admin');
+  }
+  const token = createAdminSession(username, config.secret);
+  res.append('Set-Cookie', `admin_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax`);
+  return res.redirect('/admin/dashboard');
+});
+
+app.post('/admin/logout', (_req, res) => {
+  res.append('Set-Cookie', 'admin_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
+  return res.redirect('/admin');
+});
+
+app.get('/admin/dashboard', requireAdmin, async (req, res) => {
+  const result = await safeQuery(`
+    select course_code, title, slug, category_raw, category_normalized, hours, delivery_mode, detail_url, language, is_active
+    from courses
+    order by title asc
+    limit 300
+  `);
+  const flash = clearFlash(req, res);
+  const courses = result ? result.rows : readFallbackCourses().sort((a, b) => String(a.title).localeCompare(String(b.title), 'es')).slice(0, 300);
+  return res.render('admin-dashboard', {
+    courses,
+    usingDemoData: !result,
+    flash: flash && !flash.startsWith('ERROR:') ? flash : '',
+    error: flash && flash.startsWith('ERROR:') ? flash.replace(/^ERROR:\s*/, '') : '',
+  });
+});
+
+app.post('/admin/courses', requireAdmin, async (req, res) => {
+  try {
+    const course = normalizeCourseInput(req.body);
+    if (!course.title || !course.course_code || !course.category_raw) {
+      setFlash(res, 'ERROR: Completa código, título y categoría.');
+      return res.redirect('/admin/dashboard');
+    }
+    const ok = await safeAdminUpsertCourse(course);
+    if (!ok) upsertFallbackCourse(course);
+    setFlash(res, 'Curso creado correctamente.');
+    return res.redirect('/admin/dashboard');
+  } catch (error) {
+    setFlash(res, `ERROR: ${error.message}`);
+    return res.redirect('/admin/dashboard');
+  }
+});
+
+app.post('/admin/courses/:slug', requireAdmin, async (req, res) => {
+  try {
+    const course = normalizeCourseInput(req.body, { slug: req.params.slug });
+    const ok = await safeAdminUpsertCourse(course, req.params.slug);
+    if (!ok) upsertFallbackCourse(course, req.params.slug);
+    setFlash(res, 'Curso actualizado.');
+    return res.redirect('/admin/dashboard');
+  } catch (error) {
+    setFlash(res, `ERROR: ${error.message}`);
+    return res.redirect('/admin/dashboard');
+  }
+});
+
+app.post('/admin/courses/:slug/delete', requireAdmin, async (req, res) => {
+  try {
+    const deleted = await safeQuery('delete from courses where slug = $1', [req.params.slug]);
+    if (!deleted) deleteFallbackCourse(req.params.slug);
+    setFlash(res, 'Curso eliminado.');
+    return res.redirect('/admin/dashboard');
+  } catch (error) {
+    setFlash(res, `ERROR: ${error.message}`);
+    return res.redirect('/admin/dashboard');
+  }
+});
+
+app.post('/admin/import', requireAdmin, upload.single('catalogFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      setFlash(res, 'ERROR: Debes adjuntar un fichero.');
+      return res.redirect('/admin/dashboard');
+    }
+    const ext = path.extname(req.file.originalname || '').toLowerCase();
+    const rows = ext === '.xlsx'
+      ? parseExcelFile(req.file.path)
+      : parseDelimitedText(fs.readFileSync(req.file.path, 'utf8'));
+    fs.unlinkSync(req.file.path);
+    if (!rows.length) {
+      setFlash(res, 'ERROR: No se encontraron filas en el fichero.');
+      return res.redirect('/admin/dashboard');
+    }
+    let imported = 0;
+    for (const row of rows) {
+      const course = normalizeCourseInput({
+        course_code: row.course_code || row.codigo || row.code,
+        title: row.title || row.titulo,
+        category_raw: row.category_raw || row.categoria || row.category,
+        hours: row.hours || row.horas,
+        delivery_mode: row.delivery_mode || row.modalidad,
+        detail_url: row.detail_url || row.url || row.enlace,
+        is_active: String(row.is_active || row.activo || 'true').toLowerCase() !== 'false',
+      });
+      if (!course.title || !course.course_code) continue;
+      const ok = await safeAdminUpsertCourse(course);
+      if (!ok) upsertFallbackCourse(course);
+      imported += 1;
+    }
+    setFlash(res, `Importación completada: ${imported} cursos procesados.`);
+    return res.redirect('/admin/dashboard');
+  } catch (error) {
+    setFlash(res, `ERROR: ${error.message}`);
+    return res.redirect('/admin/dashboard');
+  }
+});
+
 app.get('/api/courses', async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit || '20', 10), 100);
@@ -288,17 +499,8 @@ app.get('/api/courses', async (req, res) => {
     values.push(offset);
 
     const sql = `
-      select
-        id,
-        course_code,
-        title,
-        slug,
-        category_raw,
-        category_normalized,
-        hours,
-        delivery_mode,
-        detail_url,
-        ${ranking} as relevance_score
+      select id, course_code, title, slug, category_raw, category_normalized, hours, delivery_mode, detail_url,
+             ${ranking} as relevance_score
       from courses
       where ${where.join(' and ')}
       order by relevance_score desc, title asc
@@ -309,15 +511,7 @@ app.get('/api/courses', async (req, res) => {
     const result = await safeQuery(sql, values);
     const demoResult = result ? null : getDemoCourses({ q, category, maxHours, limit, offset });
     const items = result ? result.rows : demoResult.items;
-    res.json({
-      items,
-      limit,
-      offset,
-      q,
-      category,
-      maxHours,
-      usingDemoData: !result,
-    });
+    res.json({ items, limit, offset, q, category, maxHours, usingDemoData: !result });
   } catch (error) {
     res.status(500).json({ ok: false, error: error.message });
   }
@@ -331,9 +525,7 @@ app.get('/api/courses/:slug', async (req, res) => {
       [req.params.slug]
     );
     const course = result?.rows?.[0] || getSampleCourses().find((item) => item.slug === req.params.slug);
-    if (!course) {
-      return res.status(404).json({ ok: false, error: 'Course not found' });
-    }
+    if (!course) return res.status(404).json({ ok: false, error: 'Course not found' });
     return res.json({ ...course, usingDemoData: !result });
   } catch (error) {
     return res.status(500).json({ ok: false, error: error.message });
