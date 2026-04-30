@@ -380,13 +380,22 @@ app.get('/admin/dashboard', requireAdmin, async (req, res) => {
   const perPage = 50;
   const offset = (page - 1) * perPage;
   const flash = clearFlash(req, res);
+  const adminQuery = String(req.query.q || '').trim();
 
-  const result = await safeQuery(`
-    select course_code, title, slug, category_raw, category_normalized, hours, delivery_mode, detail_url, language, is_active
-    from courses
-    order by title asc
-    limit $1 offset $2
-  `, [perPage, offset]);
+  const result = adminQuery
+    ? await safeQuery(`
+        select course_code, title, slug, category_raw, category_normalized, hours, delivery_mode, detail_url, language, is_active
+        from courses
+        where title ilike $1 or course_code ilike $1 or coalesce(category_raw, '') ilike $1
+        order by title asc
+        limit $2 offset $3
+      `, [`%${adminQuery}%`, perPage, offset])
+    : await safeQuery(`
+        select course_code, title, slug, category_raw, category_normalized, hours, delivery_mode, detail_url, language, is_active
+        from courses
+        order by title asc
+        limit $1 offset $2
+      `, [perPage, offset]);
 
   let stats;
   let courses;
@@ -394,14 +403,24 @@ app.get('/admin/dashboard', requireAdmin, async (req, res) => {
 
   if (result) {
     courses = result.rows;
-    const statsResult = await safeQuery(`
-      select
-        count(*)::int as total,
-        count(*) filter (where is_active = true)::int as active,
-        count(*) filter (where is_active = false)::int as inactive,
-        count(*) filter (where detail_url is not null and detail_url <> '')::int as with_detail_url
-      from courses
-    `);
+    const statsResult = adminQuery
+      ? await safeQuery(`
+          select
+            count(*)::int as total,
+            count(*) filter (where is_active = true)::int as active,
+            count(*) filter (where is_active = false)::int as inactive,
+            count(*) filter (where detail_url is not null and detail_url <> '')::int as with_detail_url
+          from courses
+          where title ilike $1 or course_code ilike $1 or coalesce(category_raw, '') ilike $1
+        `, [`%${adminQuery}%`])
+      : await safeQuery(`
+          select
+            count(*)::int as total,
+            count(*) filter (where is_active = true)::int as active,
+            count(*) filter (where is_active = false)::int as inactive,
+            count(*) filter (where detail_url is not null and detail_url <> '')::int as with_detail_url
+          from courses
+        `);
     stats = statsResult?.rows?.[0]
       ? {
           total: statsResult.rows[0].total,
@@ -417,7 +436,10 @@ app.get('/admin/dashboard', requireAdmin, async (req, res) => {
         };
     totalPages = Math.max(Math.ceil(stats.total / perPage), 1);
   } else {
-    const fallbackCourses = readFallbackCourses().sort((a, b) => String(a.title).localeCompare(String(b.title), 'es'));
+    const fallbackAll = readFallbackCourses().sort((a, b) => String(a.title).localeCompare(String(b.title), 'es'));
+    const fallbackCourses = adminQuery
+      ? fallbackAll.filter((item) => [item.title, item.course_code, item.category_raw].filter(Boolean).join(' ').toLowerCase().includes(adminQuery.toLowerCase()))
+      : fallbackAll;
     courses = fallbackCourses.slice(offset, offset + perPage);
     stats = {
       total: fallbackCourses.length,
@@ -434,6 +456,7 @@ app.get('/admin/dashboard', requireAdmin, async (req, res) => {
     currentPage: page,
     totalPages,
     perPage,
+    adminQuery,
     usingDemoData: !result,
     flash: flash && !flash.startsWith('ERROR:') ? flash : '',
     error: flash && flash.startsWith('ERROR:') ? flash.replace(/^ERROR:\s*/, '') : '',

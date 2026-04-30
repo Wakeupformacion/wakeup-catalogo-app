@@ -90,8 +90,15 @@
             <h2>Mantenimiento de cursos</h2>
             <p class="helper-text">Página <%= currentPage %> de <%= totalPages %> · mostrando hasta <%= perPage %> cursos</p>
           </div>
-          <input type="search" id="adminCourseFilter" class="admin-search-input" placeholder="Filtrar por código, título o categoría..." />
         </div>
+
+        <form method="get" action="/admin/dashboard" class="admin-inline-filter-form">
+          <input type="search" name="q" value="<%= adminQuery || '' %>" class="admin-search-input admin-search-input-compact" placeholder="Filtrar por código, título o categoría..." />
+          <button type="submit" class="button ghost">Buscar</button>
+          <% if (adminQuery) { %>
+            <a class="button ghost" href="/admin/dashboard">Limpiar</a>
+          <% } %>
+        </form>
 
         <div class="admin-cards-list" id="adminCourseList">
           <% courses.forEach(function(course) { %>
@@ -129,30 +136,16 @@
         <% if (totalPages > 1) { %>
           <nav class="admin-pagination">
             <% if (currentPage > 1) { %>
-              <a class="button ghost" href="/admin/dashboard?page=<%= currentPage - 1 %>">← Anterior</a>
+              <a class="button ghost" href="/admin/dashboard?page=<%= currentPage - 1 %><%= adminQuery ? '&q=' + encodeURIComponent(adminQuery) : '' %>">← Anterior</a>
             <% } %>
             <span>Página <strong><%= currentPage %></strong> de <strong><%= totalPages %></strong></span>
             <% if (currentPage < totalPages) { %>
-              <a class="button ghost" href="/admin/dashboard?page=<%= currentPage + 1 %>">Siguiente →</a>
+              <a class="button ghost" href="/admin/dashboard?page=<%= currentPage + 1 %><%= adminQuery ? '&q=' + encodeURIComponent(adminQuery) : '' %>">Siguiente →</a>
             <% } %>
           </nav>
         <% } %>
       </section>
     </main>
 
-    <script>
-      (function () {
-        const input = document.getElementById('adminCourseFilter');
-        const items = Array.from(document.querySelectorAll('#adminCourseList .admin-course-card'));
-        if (!input || !items.length) return;
-        input.addEventListener('input', function () {
-          const q = String(input.value || '').trim().toLowerCase();
-          items.forEach(function (item) {
-            const haystack = item.getAttribute('data-search') || '';
-            item.style.display = !q || haystack.includes(q) ? '' : 'none';
-          });
-        });
-      })();
-    </script>
   </body>
 </html>

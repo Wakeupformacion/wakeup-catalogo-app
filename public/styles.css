@@ -520,6 +520,16 @@ button, .button {
   width: 100%;
   max-width: 420px;
 }
+.admin-inline-filter-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 0 22px;
+}
+.admin-search-input-compact {
+  max-width: 420px;
+}
 .admin-cards-list {
   display: grid;
   gap: 18px;
@@ -614,6 +624,8 @@ button, .button {
   .admin-topbar,
   .admin-list-toolbar,
   .admin-course-head { flex-direction: column; align-items: flex-start; }
-  .admin-search-input { max-width: 100%; width: 100%; }
+  .admin-search-input,
+  .admin-search-input-compact { max-width: 100%; width: 100%; }
+  .admin-inline-filter-form { align-items: stretch; }
   .admin-form-grid { grid-template-columns: 1fr; }
 }
