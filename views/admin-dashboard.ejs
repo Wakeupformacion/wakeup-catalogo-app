@@ -29,7 +29,9 @@
 
       <section class="admin-grid">
         <article class="card admin-panel">
-          <h2>Nuevo curso</h2>
+          <div class="admin-panel-heading">
+            <h2>Nuevo curso</h2>
+          </div>
           <form method="post" action="/admin/courses" class="admin-form-grid">
             <label><span>Código</span><input type="text" name="course_code" required /></label>
             <label><span>Título</span><input type="text" name="title" required /></label>
@@ -43,8 +45,10 @@
         </article>
 
         <article class="card admin-panel">
-          <h2>Carga de Excel/CSV</h2>
-          <p class="helper-text">Acepta CSV delimitado por comas o punto y coma y también ficheros Excel `.xlsx`.</p>
+          <div class="admin-panel-heading">
+            <h2>Carga de Excel/CSV</h2>
+            <p class="helper-text">Acepta CSV delimitado por comas o punto y coma y también ficheros Excel `.xlsx`.</p>
+          </div>
           <form method="post" action="/admin/import" enctype="multipart/form-data" class="admin-form-stack">
             <label><span>Fichero</span><input type="file" name="catalogFile" accept=".csv,.txt,.xlsx" required /></label>
             <button type="submit">Cargar catálogo</button>

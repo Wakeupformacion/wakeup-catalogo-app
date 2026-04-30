@@ -392,6 +392,16 @@ button, .button {
   gap: 18px;
   margin-bottom: 24px;
 }
+.admin-panel-heading {
+  margin-bottom: 14px;
+}
+.admin-panel-heading h2 {
+  margin: 0 0 6px;
+}
+.admin-panel-heading .helper-text {
+  margin: 0;
+  max-width: 520px;
+}
 .admin-form-stack,
 .admin-form-grid {
   display: grid;
