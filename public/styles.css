@@ -226,31 +226,34 @@ button, .button {
   display: grid;
   gap: 8px;
 }
-.cards { display: grid; gap: 16px; }
-.card { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; }
+.cards { display: grid; gap: 14px; }
+.card { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; padding: 24px 30px; }
 .card-body {
   width: 100%;
 }
-.card-category { color: var(--brand-red); font-weight: 700; margin: 0 0 6px; }
+.card-category { color: var(--brand-red); font-weight: 700; margin: 0 0 4px; font-size: 14px; }
 .card-title-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 .card-title-row h2 {
   flex: 1 1 auto;
   min-width: 0;
 }
-.card h2 { font-size: 24px; margin: 0; }
+.card h2 { font-size: 18px; line-height: 1.25; margin: 0; }
 .card-inline-button {
   white-space: nowrap;
   flex: 0 0 auto;
   margin-left: auto;
+  padding: 10px 14px;
+  font-size: 14px;
+  border-radius: 10px;
 }
-.meta { list-style: none; padding: 0; margin: 0; display: flex; gap: 14px; flex-wrap: wrap; color: #475569; }
+.meta { list-style: none; padding: 0; margin: 0; display: flex; gap: 12px; flex-wrap: wrap; color: #475569; font-size: 14px; }
 .meta.vertical { display: grid; gap: 10px; }
 .card-actions, .detail-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .detail-note { margin-top: 24px; color: #475569; }
