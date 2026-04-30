@@ -487,6 +487,35 @@ app.post('/admin/import', requireAdmin, upload.single('catalogFile'), async (req
   }
 });
 
+app.get('/admin/export.json', requireAdmin, async (_req, res) => {
+  const result = await safeQuery(`
+    select course_code, title, slug, category_raw, category_normalized, hours, delivery_mode, detail_url, language, is_active
+    from courses
+    order by title asc
+  `);
+  const items = result ? result.rows : readFallbackCourses().sort((a, b) => String(a.title).localeCompare(String(b.title), 'es'));
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="wakeup-catalogo-export.json"');
+  return res.send(`${JSON.stringify(items, null, 2)}\n`);
+});
+
+app.get('/admin/export.csv', requireAdmin, async (_req, res) => {
+  const result = await safeQuery(`
+    select course_code, title, slug, category_raw, category_normalized, hours, delivery_mode, detail_url, language, is_active
+    from courses
+    order by title asc
+  `);
+  const items = result ? result.rows : readFallbackCourses().sort((a, b) => String(a.title).localeCompare(String(b.title), 'es'));
+  const headers = ['course_code', 'title', 'slug', 'category_raw', 'category_normalized', 'hours', 'delivery_mode', 'detail_url', 'language', 'is_active'];
+  const escapeCell = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+  const csv = [headers.join(',')]
+    .concat(items.map((item) => headers.map((key) => escapeCell(item[key])).join(',')))
+    .join('\n');
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="wakeup-catalogo-export.csv"');
+  return res.send(`${csv}\n`);
+});
+
 app.get('/api/courses', async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit || '20', 10), 100);
