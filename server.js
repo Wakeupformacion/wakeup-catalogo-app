@@ -384,12 +384,40 @@ app.get('/admin/dashboard', requireAdmin, async (req, res) => {
   `);
   const flash = clearFlash(req, res);
   const courses = result ? result.rows : readFallbackCourses().sort((a, b) => String(a.title).localeCompare(String(b.title), 'es')).slice(0, 300);
-  const stats = {
-    total: courses.length,
-    active: courses.filter((item) => item.is_active !== false).length,
-    inactive: courses.filter((item) => item.is_active === false).length,
-    withDetailUrl: courses.filter((item) => item.detail_url).length,
-  };
+
+  let stats;
+  if (result) {
+    const statsResult = await safeQuery(`
+      select
+        count(*)::int as total,
+        count(*) filter (where is_active = true)::int as active,
+        count(*) filter (where is_active = false)::int as inactive,
+        count(*) filter (where detail_url is not null and detail_url <> '')::int as with_detail_url
+      from courses
+    `);
+    stats = statsResult?.rows?.[0]
+      ? {
+          total: statsResult.rows[0].total,
+          active: statsResult.rows[0].active,
+          inactive: statsResult.rows[0].inactive,
+          withDetailUrl: statsResult.rows[0].with_detail_url,
+        }
+      : {
+          total: courses.length,
+          active: courses.filter((item) => item.is_active !== false).length,
+          inactive: courses.filter((item) => item.is_active === false).length,
+          withDetailUrl: courses.filter((item) => item.detail_url).length,
+        };
+  } else {
+    const fallbackCourses = readFallbackCourses();
+    stats = {
+      total: fallbackCourses.length,
+      active: fallbackCourses.filter((item) => item.is_active !== false).length,
+      inactive: fallbackCourses.filter((item) => item.is_active === false).length,
+      withDetailUrl: fallbackCourses.filter((item) => item.detail_url).length,
+    };
+  }
+
   return res.render('admin-dashboard', {
     courses,
     stats,
