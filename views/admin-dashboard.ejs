@@ -89,7 +89,7 @@
           <div class="admin-list-toolbar-copy">
             <p class="eyebrow dark">Cursos</p>
             <h2>Mantenimiento de cursos</h2>
-            <p class="helper-text"><%= courses.length %> cursos cargados</p>
+            <p class="helper-text">Página <%= currentPage %> de <%= totalPages %> · mostrando hasta <%= perPage %> cursos</p>
           </div>
           <input type="search" id="adminCourseFilter" class="admin-search-input" placeholder="Filtrar por código, título o categoría..." />
         </div>
@@ -126,6 +126,18 @@
             </article>
           <% }) %>
         </div>
+
+        <% if (totalPages > 1) { %>
+          <nav class="admin-pagination">
+            <% if (currentPage > 1) { %>
+              <a class="button ghost" href="/admin/dashboard?page=<%= currentPage - 1 %>">← Anterior</a>
+            <% } %>
+            <span>Página <strong><%= currentPage %></strong> de <strong><%= totalPages %></strong></span>
+            <% if (currentPage < totalPages) { %>
+              <a class="button ghost" href="/admin/dashboard?page=<%= currentPage + 1 %>">Siguiente →</a>
+            <% } %>
+          </nav>
+        <% } %>
       </section>
     </main>
 

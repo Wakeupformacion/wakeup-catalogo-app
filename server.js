@@ -376,17 +376,24 @@ app.post('/admin/logout', (_req, res) => {
 });
 
 app.get('/admin/dashboard', requireAdmin, async (req, res) => {
+  const page = Math.max(parseInt(req.query.page || '1', 10), 1);
+  const perPage = 50;
+  const offset = (page - 1) * perPage;
+  const flash = clearFlash(req, res);
+
   const result = await safeQuery(`
     select course_code, title, slug, category_raw, category_normalized, hours, delivery_mode, detail_url, language, is_active
     from courses
     order by title asc
-    limit 300
-  `);
-  const flash = clearFlash(req, res);
-  const courses = result ? result.rows : readFallbackCourses().sort((a, b) => String(a.title).localeCompare(String(b.title), 'es')).slice(0, 300);
+    limit $1 offset $2
+  `, [perPage, offset]);
 
   let stats;
+  let courses;
+  let totalPages = 1;
+
   if (result) {
+    courses = result.rows;
     const statsResult = await safeQuery(`
       select
         count(*)::int as total,
@@ -408,19 +415,25 @@ app.get('/admin/dashboard', requireAdmin, async (req, res) => {
           inactive: courses.filter((item) => item.is_active === false).length,
           withDetailUrl: courses.filter((item) => item.detail_url).length,
         };
+    totalPages = Math.max(Math.ceil(stats.total / perPage), 1);
   } else {
-    const fallbackCourses = readFallbackCourses();
+    const fallbackCourses = readFallbackCourses().sort((a, b) => String(a.title).localeCompare(String(b.title), 'es'));
+    courses = fallbackCourses.slice(offset, offset + perPage);
     stats = {
       total: fallbackCourses.length,
       active: fallbackCourses.filter((item) => item.is_active !== false).length,
       inactive: fallbackCourses.filter((item) => item.is_active === false).length,
       withDetailUrl: fallbackCourses.filter((item) => item.detail_url).length,
     };
+    totalPages = Math.max(Math.ceil(stats.total / perPage), 1);
   }
 
   return res.render('admin-dashboard', {
     courses,
     stats,
+    currentPage: page,
+    totalPages,
+    perPage,
     usingDemoData: !result,
     flash: flash && !flash.startsWith('ERROR:') ? flash : '',
     error: flash && flash.startsWith('ERROR:') ? flash.replace(/^ERROR:\s*/, '') : '',

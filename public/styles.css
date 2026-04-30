@@ -524,6 +524,19 @@ button, .button {
   display: grid;
   gap: 18px;
 }
+.admin-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+}
+.admin-pagination span {
+  color: #475569;
+}
 .admin-course-card {
   border: 1px solid #e5e7eb;
   border-radius: 18px;
