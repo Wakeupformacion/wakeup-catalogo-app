@@ -76,25 +76,7 @@
         </section>
       <% } %>
 
-      <section class="cards">
-        <% items.forEach(function(course) { %>
-          <article class="card">
-            <div class="card-body">
-              <p class="card-category"><%= course.category_raw || 'Sin categoría' %></p>
-              <div class="card-title-row">
-                <h2><%= course.title %></h2>
-                <% if (course.detail_url) { %>
-                  <a class="button card-inline-button" href="<%= course.detail_url %>" target="_blank" rel="noopener noreferrer">Ver contenidos y objetivos</a>
-                <% } %>
-              </div>
-              <ul class="meta">
-                <li><strong>Horas:</strong> <%= course.hours || '-' %></li>
-                <li><strong>Modalidad:</strong> <%= course.delivery_mode %></li>
-              </ul>
-            </div>
-          </article>
-        <% }) %>
-      </section>
+      
 
       <section class="pagination-row">
         <% if (hasPrev) { %>
