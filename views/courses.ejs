@@ -15,11 +15,11 @@
         <p>Busca por temática, duración o necesidad formativa.</p>
       </header>
 
-<form class="filters" action="/cursos" method="get">
-  <% (selectedCourses || []).forEach(function(slug) { %>
-    <input type="hidden" name="courses" value="<%= slug %>" />
-  <% }) %>
-  <input type="text" name="q" value="<%= q %>" placeholder="Busca cursos o escribe tu necesidad formativa..." />
+      <form class="filters" action="/cursos" method="get">
+        <% (selectedCourses || []).forEach(function(slug) { %>
+          <input type="hidden" name="courses" value="<%= slug %>" />
+        <% }) %>
+        <input type="text" name="q" value="<%= q %>" placeholder="Busca cursos o escribe tu necesidad formativa..." />
         <select name="category" class="category-select">
           <option value="">Todas las categorías</option>
           <% (allCategories || []).forEach(function(item) { %>
@@ -81,29 +81,27 @@
 
       <% if (items.length) { %>
         <form class="budget-builder" id="budget-builder" action="/presupuesto" method="get">
+          <section class="budget-toolbar" aria-live="polite">
+            <div>
+              <p class="budget-toolbar-label">Selección para presupuesto</p>
+              <p class="budget-toolbar-text"><span id="selected-count">0</span> cursos seleccionados</p>
+            </div>
+            <div class="budget-toolbar-actions">
+              <button type="button" class="button ghost" id="clear-selection" disabled>Vaciar selección</button>
+              <button type="submit" class="button" id="budget-submit" disabled>Generar presupuesto</button>
+            </div>
+          </section>
 
-<section class="budget-toolbar" aria-live="polite">
-  <div>
-    <p class="budget-toolbar-label">Selección para presupuesto</p>
-    <p class="budget-toolbar-text"><span id="selected-count">0</span> cursos seleccionados</p>
-  </div>
-  <div class="budget-toolbar-actions">
-    <button type="button" class="button ghost" id="clear-selection" disabled>Vaciar selección</button>
-    <button type="submit" class="button" id="budget-submit" disabled>Generar presupuesto</button>
-  </div>
-</section>
-
-<section class="selection-tray" id="selection-tray" hidden>
-  <div class="selection-tray-head">
-    <div>
-      <p class="budget-toolbar-label">Cursos añadidos</p>
-      <p class="selection-tray-text">Mantendremos esta selección aunque cambies la búsqueda o el área.</p>
-    </div>
-    <span class="chip"><span id="selection-tray-count">0</span> guardados</span>
-  </div>
-  <div class="selection-tray-list" id="selection-tray-list"></div>
-</section>
-
+          <section class="selection-tray" id="selection-tray" hidden>
+            <div class="selection-tray-head">
+              <div>
+                <p class="budget-toolbar-label">Cursos añadidos</p>
+                <p class="selection-tray-text">Mantendremos esta selección aunque cambies la búsqueda o el área.</p>
+              </div>
+              <span class="chip"><span id="selection-tray-count">0</span> guardados</span>
+            </div>
+            <div class="selection-tray-list" id="selection-tray-list"></div>
+          </section>
 
           <section class="cards selectable-cards">
             <% items.forEach(function(course) { %>
@@ -130,65 +128,137 @@
           </section>
         </form>
 
-       <script>
-  (function () {
-    const form = document.getElementById('budget-builder');
-    if (!form) return;
+        <script>
+          (function () {
+            const form = document.getElementById('budget-builder');
+            if (!form) return;
 
-    const checkboxes = Array.from(form.querySelectorAll('[data-course-checkbox]'));
-    const selectedCount = document.getElementById('selected-count');
-    const selectionTray = document.getElementById('selection-tray');
-    const selectionTrayCount = document.getElementById('selection-tray-count');
-    const selectionTrayList = document.getElementById('selection-tray-list');
-    const submitButton = document.getElementById('budget-submit');
-    const clearButton = document.getElementById('clear-selection');
+            const STORAGE_KEY = 'wakeup-selected-courses';
+            const checkboxes = Array.from(form.querySelectorAll('[data-course-checkbox]'));
+            const filterForm = document.querySelector('form.filters');
+            const selectedCount = document.getElementById('selected-count');
+            const selectionTray = document.getElementById('selection-tray');
+            const selectionTrayCount = document.getElementById('selection-tray-count');
+            const selectionTrayList = document.getElementById('selection-tray-list');
+            const submitButton = document.getElementById('budget-submit');
+            const clearButton = document.getElementById('clear-selection');
 
-    function updateSelectionState() {
-      const selected = checkboxes.filter((checkbox) => checkbox.checked);
-      selectedCount.textContent = String(selected.length);
-      submitButton.disabled = selected.length === 0;
-      clearButton.disabled = selected.length === 0;
-      selectionTray.hidden = selected.length === 0;
-      selectionTrayCount.textContent = String(selected.length);
-      selectionTrayList.innerHTML = '';
+            function readStored() {
+              try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+              } catch (_error) {
+                return [];
+              }
+            }
 
-      checkboxes.forEach((checkbox) => {
-        const card = checkbox.closest('[data-course-card]');
-        if (!card) return;
-        card.classList.toggle('is-selected', checkbox.checked);
-      });
+            function writeStored(items) {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+            }
 
-      selected.forEach((checkbox) => {
-        const item = document.createElement('button');
-        item.type = 'button';
-        item.className = 'selection-pill';
-        item.textContent = checkbox.dataset.courseTitle || checkbox.value;
-        item.addEventListener('click', () => {
-          checkbox.checked = false;
-          updateSelectionState();
-        });
-        selectionTrayList.appendChild(item);
-      });
-    }
+            function syncFilterHiddenInputs(selected) {
+              if (!filterForm) return;
+              filterForm.querySelectorAll('input[data-selected-course-hidden]').forEach((node) => node.remove());
+              selected.forEach((item) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'courses';
+                input.value = item.slug;
+                input.setAttribute('data-selected-course-hidden', 'true');
+                filterForm.appendChild(input);
+              });
+            }
 
-    checkboxes.forEach((checkbox) => {
-      checkbox.addEventListener('change', updateSelectionState);
-    });
+            function syncBudgetHiddenInputs(selected) {
+              form.querySelectorAll('input[data-selected-course-hidden]').forEach((node) => node.remove());
+              selected.forEach((item) => {
+                if (checkboxes.some((checkbox) => checkbox.value === item.slug)) return;
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'courses';
+                input.value = item.slug;
+                input.setAttribute('data-selected-course-hidden', 'true');
+                form.appendChild(input);
+              });
+            }
 
-    clearButton.addEventListener('click', () => {
-      checkboxes.forEach((checkbox) => {
-        checkbox.checked = false;
-      });
-      updateSelectionState();
-    });
+            function buildSelectedState() {
+              const stored = readStored();
+              const bySlug = new Map(stored.map((item) => [item.slug, item]));
 
-    updateSelectionState();
-  })();
-</script>
+              checkboxes.forEach((checkbox) => {
+                if (checkbox.checked) {
+                  bySlug.set(checkbox.value, {
+                    slug: checkbox.value,
+                    title: checkbox.dataset.courseTitle || checkbox.value,
+                  });
+                } else if (bySlug.has(checkbox.value)) {
+                  const stillHidden = form.querySelector(`input[data-selected-course-hidden][value="${checkbox.value}"]`);
+                  if (!stillHidden) bySlug.delete(checkbox.value);
+                }
+              });
 
+              return Array.from(bySlug.values());
+            }
 
-<% } %>
+            function applyStoredSelection() {
+              const stored = readStored();
+              checkboxes.forEach((checkbox) => {
+                checkbox.checked = stored.some((item) => item.slug === checkbox.value);
+              });
+            }
 
+            function updateSelectionState() {
+              const selected = buildSelectedState();
+              writeStored(selected);
+              syncFilterHiddenInputs(selected);
+              syncBudgetHiddenInputs(selected);
+
+              selectedCount.textContent = String(selected.length);
+              submitButton.disabled = selected.length === 0;
+              clearButton.disabled = selected.length === 0;
+              selectionTray.hidden = selected.length === 0;
+              selectionTrayCount.textContent = String(selected.length);
+              selectionTrayList.innerHTML = '';
+
+              checkboxes.forEach((checkbox) => {
+                const card = checkbox.closest('[data-course-card]');
+                if (!card) return;
+                card.classList.toggle('is-selected', checkbox.checked);
+              });
+
+              selected.forEach((item) => {
+                const trayItem = document.createElement('button');
+                trayItem.type = 'button';
+                trayItem.className = 'selection-pill';
+                trayItem.textContent = item.title || item.slug;
+                trayItem.addEventListener('click', () => {
+                  const checkbox = checkboxes.find((entry) => entry.value === item.slug);
+                  if (checkbox) checkbox.checked = false;
+                  const next = readStored().filter((entry) => entry.slug !== item.slug);
+                  writeStored(next);
+                  updateSelectionState();
+                });
+                selectionTrayList.appendChild(trayItem);
+              });
+            }
+
+            checkboxes.forEach((checkbox) => {
+              checkbox.addEventListener('change', updateSelectionState);
+            });
+
+            clearButton.addEventListener('click', () => {
+              checkboxes.forEach((checkbox) => {
+                checkbox.checked = false;
+              });
+              writeStored([]);
+              updateSelectionState();
+            });
+
+            applyStoredSelection();
+            updateSelectionState();
+          })();
+        </script>
+      <% } %>
 
       <section class="pagination-row">
         <% if (hasPrev) { %>
@@ -197,7 +267,7 @@
           <span></span>
         <% } %>
         <% if (items.length === limit) { %>
-<a class="button ghost" href="/cursos?q=<%= encodeURIComponent(q) %>&category=<%= encodeURIComponent(category) %>&maxHours=<%= encodeURIComponent(maxHours || '') %>&offset=<%= nextOffset %>&limit=<%= limit %><%= selectedCoursesQuery ? '&' + selectedCoursesQuery : '' %>">Siguiente →</a>
+          <a class="button ghost" href="/cursos?q=<%= encodeURIComponent(q) %>&category=<%= encodeURIComponent(category) %>&maxHours=<%= encodeURIComponent(maxHours || '') %>&offset=<%= nextOffset %>&limit=<%= limit %><%= selectedCoursesQuery ? '&' + selectedCoursesQuery : '' %>">Siguiente →</a>
         <% } %>
       </section>
     </main>

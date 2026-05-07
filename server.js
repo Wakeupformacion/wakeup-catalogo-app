@@ -36,81 +36,6 @@ async function safeQuery(query, params = []) {
   }
 }
 
-function formatBudgetCurrency(value) {
-  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
-}
-
-function buildSelectedCoursesFromRequest(rawCourses) {
-  const selected = Array.isArray(rawCourses)
-    ? rawCourses
-    : rawCourses
-      ? [rawCourses]
-      : [];
-
-  return Array.from(new Set(selected.filter(Boolean)));
-}
-
-function buildSelectedCoursesQuery(selectedCourses = []) {
-  const params = new URLSearchParams();
-  selectedCourses.forEach((slug) => {
-    if (slug) params.append('courses', slug);
-  });
-  return params.toString();
-}
-
-
-function buildSelectedCoursesFromRequest(rawCourses) {
-  const selected = Array.isArray(rawCourses)
-    ? rawCourses
-    : rawCourses
-      ? [rawCourses]
-      : [];
-
-  return Array.from(new Set(selected.filter(Boolean)));
-}
-
-function buildSelectedCoursesQuery(selectedCourses = []) {
-  const params = new URLSearchParams();
-  selectedCourses.forEach((slug) => {
-    if (slug) params.append('courses', slug);
-  });
-  return params.toString();
-}
-async function getBudgetItems(selectedSlugs) {
-  const result = await safeQuery(
-    `select id, course_code, title, slug, category_raw, category_normalized, hours, delivery_mode, detail_url
-     from courses
-     where is_active = true and slug = any($1::text[])
-     order by title asc`,
-    [selectedSlugs]
-  );
-
-  const fallbackItems = getSampleCourses()
-    .filter((item) => selectedSlugs.includes(item.slug))
-    .sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'es'));
-
-  const items = result ? result.rows : fallbackItems;
-
-  return items.map((item) => {
-    const hours = Number(item.hours) || 0;
-    const amount = hours * BUDGET_RATE_PER_HOUR;
-    return {
-      ...item,
-      hours,
-      amount,
-    };
-  });
-}
-
-function collectCompanyData(source = {}) {
-  return {
-    companyName: (source.companyName || '').trim(),
-    contactName: (source.contactName || '').trim(),
-    email: (source.email || '').trim(),
-    phone: (source.phone || '').trim(),
-  };
-}
-
 function scoreDemoCourse(course, q) {
   if (!q) return 0;
   const normalizedQ = normalizeText(q);
@@ -145,6 +70,63 @@ function getDemoCourses({ q, category, maxHours, limit, offset }) {
   return {
     items: filtered.slice(offset, offset + limit),
     total: filtered.length,
+  };
+}
+
+function formatBudgetCurrency(value) {
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
+}
+
+function buildSelectedCoursesFromRequest(rawCourses) {
+  const selected = Array.isArray(rawCourses)
+    ? rawCourses
+    : rawCourses
+      ? [rawCourses]
+      : [];
+
+  return Array.from(new Set(selected.filter(Boolean)));
+}
+
+function buildSelectedCoursesQuery(selectedCourses = []) {
+  const params = new URLSearchParams();
+  selectedCourses.forEach((slug) => {
+    if (slug) params.append('courses', slug);
+  });
+  return params.toString();
+}
+
+async function getBudgetItems(selectedSlugs) {
+  const result = await safeQuery(
+    `select id, course_code, title, slug, category_raw, category_normalized, hours, delivery_mode, detail_url
+     from courses
+     where is_active = true and slug = any($1::text[])
+     order by title asc`,
+    [selectedSlugs]
+  );
+
+  const fallbackItems = getSampleCourses()
+    .filter((item) => selectedSlugs.includes(item.slug))
+    .sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'es'));
+
+  const items = result ? result.rows : fallbackItems;
+
+  return items.map((item) => {
+    const hours = Number(item.hours) || 0;
+    const amount = hours * BUDGET_RATE_PER_HOUR;
+    return {
+      ...item,
+      hours,
+      amount,
+    };
+  });
+}
+
+function collectCompanyData(source = {}) {
+  return {
+    companyName: (source.companyName || '').trim(),
+    contactName: (source.contactName || '').trim(),
+    email: (source.email || '').trim(),
+    phone: (source.phone || '').trim(),
   };
 }
 
@@ -355,16 +337,16 @@ app.get('/cursos', async (req, res) => {
       offset,
       usingDemoData: !result,
       categoryChips: buildCategoryChips(topCategories, category),
-allCategories: categories,
-hasPrev,
-nextOffset,
-prevOffset,
-selectedCourses: buildSelectedCoursesFromRequest(req.query.courses),
-selectedCoursesQuery: buildSelectedCoursesQuery(buildSelectedCoursesFromRequest(req.query.courses)),
-emptyStateTips: getEmptyStateTips(),
-catalogMicrocopy: getCatalogMicrocopy(),
-searchSuggestions: getSearchSuggestions(),
-encodeURIComponent,
+      allCategories: categories,
+      hasPrev,
+      nextOffset,
+      prevOffset,
+      selectedCourses: buildSelectedCoursesFromRequest(req.query.courses),
+      selectedCoursesQuery: buildSelectedCoursesQuery(buildSelectedCoursesFromRequest(req.query.courses)),
+      emptyStateTips: getEmptyStateTips(),
+      catalogMicrocopy: getCatalogMicrocopy(),
+      searchSuggestions: getSearchSuggestions(),
+      encodeURIComponent,
     }, (err, html) => {
       if (err) return res.status(500).send(err.stack || err.message);
       return res.send(html);
@@ -375,6 +357,89 @@ encodeURIComponent,
 });
 
 app.get('/estado-demo', (_req, res) => res.redirect('/cursos'));
+
+app.get('/presupuesto', async (req, res) => {
+  try {
+    const uniqueSelected = buildSelectedCoursesFromRequest(req.query.courses);
+    if (!uniqueSelected.length) return res.redirect('/cursos');
+
+    const items = await getBudgetItems(uniqueSelected);
+    if (!items.length) return res.redirect('/cursos');
+
+    const totalHours = items.reduce((sum, item) => sum + item.hours, 0);
+    const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
+    const budgetSummary = items.map((item) => `${item.title} (${item.hours}h)`).join(', ');
+    const company = collectCompanyData(req.query);
+
+    return res.render('budget-summary', {
+      pageMeta: buildPageMeta({
+        title: 'Presupuesto generado · WakeUp',
+        description: `Resumen de cursos seleccionados y presupuesto estimado para ${budgetSummary}.`,
+        path: `/presupuesto${req.originalUrl.includes('?') ? req.originalUrl.slice('/presupuesto'.length) : ''}`,
+      }),
+      items,
+      totalHours,
+      totalAmount,
+      ratePerHour: BUDGET_RATE_PER_HOUR,
+      formattedRate: formatBudgetCurrency(BUDGET_RATE_PER_HOUR),
+      formatCurrency: formatBudgetCurrency,
+      company,
+    });
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+});
+
+app.get('/presupuesto/pdf', async (req, res) => {
+  try {
+    const uniqueSelected = buildSelectedCoursesFromRequest(req.query.courses);
+    if (!uniqueSelected.length) return res.redirect('/cursos');
+
+    const items = await getBudgetItems(uniqueSelected);
+    if (!items.length) return res.redirect('/cursos');
+
+    const totalHours = items.reduce((sum, item) => sum + item.hours, 0);
+    const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
+    const company = collectCompanyData(req.query);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="presupuesto-wakeup.pdf"');
+
+    const doc = new PDFDocument({ margin: 50 });
+    doc.pipe(res);
+
+    doc.fontSize(22).fillColor('#c81e3a').text('Presupuesto WakeUp');
+    doc.moveDown(0.5);
+    doc.fontSize(11).fillColor('#475569').text(`Tarifa aplicada: ${formatBudgetCurrency(BUDGET_RATE_PER_HOUR)} por hora`);
+    doc.moveDown();
+
+    doc.fontSize(14).fillColor('#111827').text('Datos de empresa');
+    doc.moveDown(0.4);
+    doc.fontSize(11).fillColor('#374151');
+    doc.text(`Empresa: ${company.companyName || '-'}`);
+    doc.text(`Persona de contacto: ${company.contactName || '-'}`);
+    doc.text(`Email: ${company.email || '-'}`);
+    doc.text(`Teléfono: ${company.phone || '-'}`);
+    doc.moveDown();
+
+    doc.fontSize(14).fillColor('#111827').text('Cursos seleccionados');
+    doc.moveDown(0.5);
+
+    items.forEach((item, index) => {
+      doc.fontSize(12).fillColor('#111827').text(`${index + 1}. ${item.title}`);
+      doc.fontSize(10).fillColor('#4b5563').text(`${item.category_raw || 'Sin categoría'} · ${item.hours} horas · ${item.delivery_mode}`);
+      doc.fontSize(11).fillColor('#c81e3a').text(`Importe: ${formatBudgetCurrency(item.amount)}`);
+      doc.moveDown(0.7);
+    });
+
+    doc.moveDown(0.4);
+    doc.fontSize(13).fillColor('#111827').text(`Total horas: ${totalHours} h`);
+    doc.fontSize(18).fillColor('#c81e3a').text(`Importe presupuestado: ${formatBudgetCurrency(totalAmount)}`);
+    doc.end();
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+});
 
 app.get('/cursos/:slug', async (req, res) => {
   try {
@@ -734,88 +799,6 @@ app.get('/api/categories', async (_req, res) => {
 });
 
 const port = parseInt(process.env.PORT || '3001', 10);
-app.get('/presupuesto', async (req, res) => {
-  try {
-    const uniqueSelected = buildSelectedCoursesFromRequest(req.query.courses);
-    if (!uniqueSelected.length) return res.redirect('/cursos');
-
-    const items = await getBudgetItems(uniqueSelected);
-    if (!items.length) return res.redirect('/cursos');
-
-    const totalHours = items.reduce((sum, item) => sum + item.hours, 0);
-    const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
-    const budgetSummary = items.map((item) => `${item.title} (${item.hours}h)`).join(', ');
-    const company = collectCompanyData(req.query);
-
-    return res.render('budget-summary', {
-      pageMeta: buildPageMeta({
-        title: 'Presupuesto generado · WakeUp',
-        description: `Resumen de cursos seleccionados y presupuesto estimado para ${budgetSummary}.`,
-        path: `/presupuesto${req.originalUrl.includes('?') ? req.originalUrl.slice('/presupuesto'.length) : ''}`,
-      }),
-      items,
-      totalHours,
-      totalAmount,
-      ratePerHour: BUDGET_RATE_PER_HOUR,
-      formattedRate: formatBudgetCurrency(BUDGET_RATE_PER_HOUR),
-      formatCurrency: formatBudgetCurrency,
-      company,
-    });
-  } catch (error) {
-    return res.status(500).send(error.message);
-  }
-});
-
-app.get('/presupuesto/pdf', async (req, res) => {
-  try {
-    const uniqueSelected = buildSelectedCoursesFromRequest(req.query.courses);
-    if (!uniqueSelected.length) return res.redirect('/cursos');
-
-    const items = await getBudgetItems(uniqueSelected);
-    if (!items.length) return res.redirect('/cursos');
-
-    const totalHours = items.reduce((sum, item) => sum + item.hours, 0);
-    const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
-    const company = collectCompanyData(req.query);
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=\"presupuesto-wakeup.pdf\"');
-
-    const doc = new PDFDocument({ margin: 50 });
-    doc.pipe(res);
-
-    doc.fontSize(22).fillColor('#c81e3a').text('Presupuesto WakeUp');
-    doc.moveDown(0.5);
-    doc.fontSize(11).fillColor('#475569').text(`Tarifa aplicada: ${formatBudgetCurrency(BUDGET_RATE_PER_HOUR)} por hora`);
-    doc.moveDown();
-
-    doc.fontSize(14).fillColor('#111827').text('Datos de empresa');
-    doc.moveDown(0.4);
-    doc.fontSize(11).fillColor('#374151');
-    doc.text(`Empresa: ${company.companyName || '-'}`);
-    doc.text(`Persona de contacto: ${company.contactName || '-'}`);
-    doc.text(`Email: ${company.email || '-'}`);
-    doc.text(`Teléfono: ${company.phone || '-'}`);
-    doc.moveDown();
-
-    doc.fontSize(14).fillColor('#111827').text('Cursos seleccionados');
-    doc.moveDown(0.5);
-
-    items.forEach((item, index) => {
-      doc.fontSize(12).fillColor('#111827').text(`${index + 1}. ${item.title}`);
-      doc.fontSize(10).fillColor('#4b5563').text(`${item.category_raw || 'Sin categoría'} · ${item.hours} horas · ${item.delivery_mode}`);
-      doc.fontSize(11).fillColor('#c81e3a').text(`Importe: ${formatBudgetCurrency(item.amount)}`);
-      doc.moveDown(0.7);
-    });
-
-    doc.moveDown(0.4);
-    doc.fontSize(13).fillColor('#111827').text(`Total horas: ${totalHours} h`);
-    doc.fontSize(18).fillColor('#c81e3a').text(`Importe presupuestado: ${formatBudgetCurrency(totalAmount)}`);
-    doc.end();
-  } catch (error) {
-    return res.status(500).send(error.message);
-  }
-});
 app.listen(port, () => {
   console.log(`WakeUp catálogo API listening on http://localhost:${port}`);
 });
