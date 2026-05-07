@@ -1,1 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <%- include('partials-meta') %>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <%- include('partials-header') %>
+    <main class="page detail-page">
+      <header class="page-header">
+        <a href="/cursos" class="back-link">← Volver al catálogo</a>
+        <p class="eyebrow dark">Presupuesto generado</p>
+        <h1>Resumen de cursos seleccionados</h1>
+        <p class="lead budget-lead">Importe calculado a <strong><%= formattedRate %></strong> por hora de formación.</p>
+      </header>
 
+      <section class="budget-summary-grid">
+        <article class="detail-card budget-summary-card">
+          <div class="budget-summary-head">
+            <h2>Cursos incluidos</h2>
+            <span class="chip"><%= items.length %> seleccionados</span>
+          </div>
+
+          <div class="budget-summary-list">
+            <% items.forEach(function(course) { %>
+              <article class="budget-line-item">
+                <div>
+                  <p class="card-category"><%= course.category_raw || 'Sin categoría' %></p>
+                  <h3><%= course.title %></h3>
+                  <p class="budget-line-meta"><strong><%= course.hours %></strong> horas · modalidad <%= course.delivery_mode %></p>
+                </div>
+                <div class="budget-line-amount"><%= formatCurrency(course.amount) %></div>
+              </article>
+            <% }) %>
+          </div>
+        </article>
+
+        <aside class="budget-side-column">
+          <article class="detail-card budget-totals-card">
+            <p class="eyebrow dark">Resumen económico</p>
+            <div class="budget-total-row">
+              <span>Total horas</span>
+              <strong><%= totalHours %> h</strong>
+            </div>
+            <div class="budget-total-row">
+              <span>Precio por hora</span>
+              <strong><%= formattedRate %></strong>
+            </div>
+            <div class="budget-total-row budget-total-row-final">
+              <span>Importe presupuestado</span>
+              <strong><%= formatCurrency(totalAmount) %></strong>
+            </div>
+          </article>
+
+          <article class="detail-card budget-company-card">
+            <p class="eyebrow dark">Datos de empresa</p>
+            <form class="budget-company-form" action="/presupuesto" method="get">
+              <% items.forEach(function(course) { %>
+                <input type="hidden" name="courses" value="<%= course.slug %>" />
+              <% }) %>
+
+              <label>
+                Empresa
+                <input type="text" name="companyName" value="<%= company.companyName %>" placeholder="Nombre de la empresa" />
+              </label>
+              <label>
+                Persona de contacto
+                <input type="text" name="contactName" value="<%= company.contactName %>" placeholder="Nombre y apellidos" />
+              </label>
+              <label>
+                Email
+                <input type="email" name="email" value="<%= company.email %>" placeholder="correo@empresa.com" />
+              </label>
+              <label>
+                Teléfono
+                <input type="text" name="phone" value="<%= company.phone %>" placeholder="600 000 000" />
+              </label>
+
+              <div class="detail-actions budget-company-actions">
+                <button type="submit" class="button ghost">Actualizar datos</button>
+                <a class="button" href="/presupuesto/pdf?<%= items.map(function(course) { return 'courses=' + encodeURIComponent(course.slug); }).join('&') %><%= company.companyName ? '&companyName=' + encodeURIComponent(company.companyName) : '' %><%= company.contactName ? '&contactName=' + encodeURIComponent(company.contactName) : '' %><%= company.email ? '&email=' + encodeURIComponent(company.email) : '' %><%= company.phone ? '&phone=' + encodeURIComponent(company.phone) : '' %>">Descargar presupuesto en PDF</a>
+              </div>
+            </form>
+          </article>
+
+          <div class="detail-actions">
+            <a class="button ghost" href="/cursos">Seguir seleccionando cursos</a>
+          </div>
+        </aside>
+      </section>
+    </main>
+  </body>
+</html>
