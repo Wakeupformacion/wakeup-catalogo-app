@@ -660,3 +660,188 @@ button, .button {
   .admin-inline-filter-form { align-items: stretch; }
   .admin-form-grid { grid-template-columns: 1fr; }
 }
+
+.budget-builder {
+  display: grid;
+  gap: 16px;
+}
+.budget-toolbar {
+  position: sticky;
+  top: 88px;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.96);
+  border: 1px solid var(--brand-border);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+.budget-toolbar-label {
+  margin: 0 0 4px;
+  color: var(--brand-red);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.budget-toolbar-text {
+  margin: 0;
+  color: #334155;
+  font-weight: 600;
+}
+.budget-toolbar .button[disabled] {
+  opacity: .55;
+  cursor: not-allowed;
+}
+.selectable-cards {
+  margin-top: 2px;
+}
+.selectable-card {
+  border: 2px solid transparent;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.selectable-card.is-selected {
+  border-color: var(--brand-red);
+  box-shadow: 0 16px 34px rgba(200, 30, 58, 0.14);
+  transform: translateY(-2px);
+}
+.course-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 170px;
+  color: #334155;
+  font-weight: 700;
+  cursor: pointer;
+}
+.course-select-label input {
+  min-width: auto;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--brand-red);
+}
+.budget-lead {
+  color: #475569;
+  max-width: 760px;
+}
+.budget-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, .9fr);
+  gap: 20px;
+  align-items: start;
+}
+.budget-side-column {
+  display: grid;
+  gap: 18px;
+}
+.budget-summary-card,
+.budget-totals-card,
+.budget-company-card {
+  padding: 28px;
+}
+.budget-summary-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.budget-summary-head h2,
+.budget-line-item h3 {
+  margin: 0;
+}
+.budget-summary-list {
+  display: grid;
+  gap: 14px;
+}
+.budget-line-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 18px 0;
+  border-top: 1px solid #e5e7eb;
+}
+.budget-line-item:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.budget-line-meta {
+  margin: 8px 0 0;
+  color: #475569;
+}
+.budget-line-amount {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--brand-red);
+  white-space: nowrap;
+}
+.budget-total-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #e5e7eb;
+  color: #334155;
+}
+.budget-total-row strong {
+  color: #0f172a;
+}
+.budget-total-row-final {
+  margin-top: 8px;
+  padding-top: 18px;
+  font-size: 18px;
+  border-top: 2px solid var(--brand-border);
+  border-bottom: 0;
+}
+.budget-total-row-final strong {
+  color: var(--brand-red);
+  font-size: 28px;
+}
+.budget-company-form {
+  display: grid;
+  gap: 14px;
+}
+.budget-company-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  color: #334155;
+  font-weight: 600;
+}
+.budget-company-actions {
+  margin-top: 6px;
+}
+.budget-company-actions .button {
+  flex: 1 1 220px;
+}
+
+@media (max-width: 760px) {
+  .budget-toolbar {
+    top: 76px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .budget-toolbar .button {
+    width: 100%;
+  }
+  .budget-summary-grid {
+    grid-template-columns: 1fr;
+  }
+  .budget-summary-head,
+  .budget-line-item,
+  .budget-total-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .budget-line-amount {
+    white-space: normal;
+  }
+  .course-select-label {
+    min-width: auto;
+  }
+}
