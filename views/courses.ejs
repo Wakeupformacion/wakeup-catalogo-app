@@ -76,7 +76,71 @@
         </section>
       <% } %>
 
-      
+      <% if (items.length) { %>
+        <form class="budget-builder" id="budget-builder" action="/presupuesto" method="get">
+          <section class="budget-toolbar" aria-live="polite">
+            <div>
+              <p class="budget-toolbar-label">Selección para presupuesto</p>
+              <p class="budget-toolbar-text"><span id="selected-count">0</span> cursos seleccionados</p>
+            </div>
+            <button type="submit" class="button" id="budget-submit" disabled>Generar presupuesto</button>
+          </section>
+
+          <section class="cards selectable-cards">
+            <% items.forEach(function(course) { %>
+              <article class="card selectable-card" data-course-card>
+                <label class="course-select-label">
+                  <input type="checkbox" name="courses" value="<%= course.slug %>" data-course-checkbox data-course-title="<%= course.title %>" />
+                  <span>Seleccionar curso</span>
+                </label>
+                <div class="card-body">
+                  <p class="card-category"><%= course.category_raw || 'Sin categoría' %></p>
+                  <div class="card-title-row">
+                    <h2><%= course.title %></h2>
+                    <% if (course.detail_url) { %>
+                      <a class="button card-inline-button" href="<%= course.detail_url %>" target="_blank" rel="noopener noreferrer">Ver contenidos y objetivos</a>
+                    <% } %>
+                  </div>
+                  <ul class="meta">
+                    <li><strong>Horas:</strong> <%= course.hours || '-' %></li>
+                    <li><strong>Modalidad:</strong> <%= course.delivery_mode %></li>
+                  </ul>
+                </div>
+              </article>
+            <% }) %>
+          </section>
+        </form>
+
+        <script>
+          (function () {
+            const form = document.getElementById('budget-builder');
+            if (!form) return;
+
+            const checkboxes = Array.from(form.querySelectorAll('[data-course-checkbox]'));
+            const selectedCount = document.getElementById('selected-count');
+            const submitButton = document.getElementById('budget-submit');
+
+            function updateSelectionState() {
+              const selected = checkboxes.filter((checkbox) => checkbox.checked);
+              selectedCount.textContent = String(selected.length);
+              submitButton.disabled = selected.length === 0;
+
+              checkboxes.forEach((checkbox) => {
+                const card = checkbox.closest('[data-course-card]');
+                if (!card) return;
+                card.classList.toggle('is-selected', checkbox.checked);
+              });
+            }
+
+            checkboxes.forEach((checkbox) => {
+              checkbox.addEventListener('change', updateSelectionState);
+            });
+
+            updateSelectionState();
+          })();
+        </script>
+      <% } %>
+
 
       <section class="pagination-row">
         <% if (hasPrev) { %>
