@@ -4,6 +4,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const PDFDocument = require('pdfkit');
 const { randomUUID } = require('crypto');
 const { pool } = require('./db');
 const { normalizeText, expandSearchTerms, extractHoursIntent, buildSearchWhere, buildRankingExpression } = require('./search');
@@ -15,6 +16,7 @@ const { buildCourseNav } = require('./navigation-utils');
 const { uploadsDir, ensureUploadsDir, parseCookies, createAdminSession, verifyAdminSession, getAdminAuthConfig, normalizeCourseInput, buildSearchText, readFallbackCourses, writeFallbackCourses, parseDelimitedText, parseExcelFile } = require('./admin-utils');
 
 const appBaseUrl = (process.env.APP_BASE_URL || 'https://wakeup-catalogo-app.onrender.com').replace(/\/$/, '');
+const BUDGET_RATE_PER_HOUR = 8.25;
 
 function buildPageMeta({ title, description, path: pagePath = '/', image = '/WakeUpLogo.png', type = 'website' }) {
   return {
