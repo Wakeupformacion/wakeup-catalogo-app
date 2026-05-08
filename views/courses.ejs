@@ -15,8 +15,11 @@
         <p>Busca por temática, duración o necesidad formativa.</p>
       </header>
 
-      <form class="filters" action="/cursos" method="get">
-        <input type="text" name="q" value="<%= q %>" placeholder="Busca cursos o escribe tu necesidad formativa..." />
+<form class="filters" action="/cursos" method="get">
+  <% (selectedCourses || []).forEach(function(slug) { %>
+    <input type="hidden" name="courses" value="<%= slug %>" />
+  <% }) %>
+  <input type="text" name="q" value="<%= q %>" placeholder="Busca cursos o escribe tu necesidad formativa..." />
         <select name="category" class="category-select">
           <option value="">Todas las categorías</option>
           <% (allCategories || []).forEach(function(item) { %>
