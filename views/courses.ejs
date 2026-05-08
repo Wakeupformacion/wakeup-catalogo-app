@@ -93,7 +93,7 @@
             <% items.forEach(function(course) { %>
               <article class="card selectable-card" data-course-card>
                 <label class="course-select-label">
-                  <input type="checkbox" name="courses" value="<%= course.slug %>" data-course-checkbox data-course-title="<%= course.title %>" />
+                  <input type="checkbox" name="courses" value="<%= course.slug %>" data-course-checkbox data-course-title="<%= course.title %>" <%= (selectedCourses || []).includes(course.slug) ? 'checked' : '' %> />
                   <span>Seleccionar curso</span>
                 </label>
                 <div class="card-body">
