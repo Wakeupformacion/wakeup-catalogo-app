@@ -130,35 +130,64 @@
           </section>
         </form>
 
-        <script>
-          (function () {
-            const form = document.getElementById('budget-builder');
-            if (!form) return;
+       <script>
+  (function () {
+    const form = document.getElementById('budget-builder');
+    if (!form) return;
 
-            const checkboxes = Array.from(form.querySelectorAll('[data-course-checkbox]'));
-            const selectedCount = document.getElementById('selected-count');
-            const submitButton = document.getElementById('budget-submit');
+    const checkboxes = Array.from(form.querySelectorAll('[data-course-checkbox]'));
+    const selectedCount = document.getElementById('selected-count');
+    const selectionTray = document.getElementById('selection-tray');
+    const selectionTrayCount = document.getElementById('selection-tray-count');
+    const selectionTrayList = document.getElementById('selection-tray-list');
+    const submitButton = document.getElementById('budget-submit');
+    const clearButton = document.getElementById('clear-selection');
 
-            function updateSelectionState() {
-              const selected = checkboxes.filter((checkbox) => checkbox.checked);
-              selectedCount.textContent = String(selected.length);
-              submitButton.disabled = selected.length === 0;
+    function updateSelectionState() {
+      const selected = checkboxes.filter((checkbox) => checkbox.checked);
+      selectedCount.textContent = String(selected.length);
+      submitButton.disabled = selected.length === 0;
+      clearButton.disabled = selected.length === 0;
+      selectionTray.hidden = selected.length === 0;
+      selectionTrayCount.textContent = String(selected.length);
+      selectionTrayList.innerHTML = '';
 
-              checkboxes.forEach((checkbox) => {
-                const card = checkbox.closest('[data-course-card]');
-                if (!card) return;
-                card.classList.toggle('is-selected', checkbox.checked);
-              });
-            }
+      checkboxes.forEach((checkbox) => {
+        const card = checkbox.closest('[data-course-card]');
+        if (!card) return;
+        card.classList.toggle('is-selected', checkbox.checked);
+      });
 
-            checkboxes.forEach((checkbox) => {
-              checkbox.addEventListener('change', updateSelectionState);
-            });
+      selected.forEach((checkbox) => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'selection-pill';
+        item.textContent = checkbox.dataset.courseTitle || checkbox.value;
+        item.addEventListener('click', () => {
+          checkbox.checked = false;
+          updateSelectionState();
+        });
+        selectionTrayList.appendChild(item);
+      });
+    }
 
-            updateSelectionState();
-          })();
-        </script>
-      <% } %>
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener('change', updateSelectionState);
+    });
+
+    clearButton.addEventListener('click', () => {
+      checkboxes.forEach((checkbox) => {
+        checkbox.checked = false;
+      });
+      updateSelectionState();
+    });
+
+    updateSelectionState();
+  })();
+</script>
+
+
+<% } %>
 
 
       <section class="pagination-row">
