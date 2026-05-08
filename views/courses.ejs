@@ -192,12 +192,12 @@
 
       <section class="pagination-row">
         <% if (hasPrev) { %>
-          <a class="button ghost" href="/cursos?q=<%= encodeURIComponent(q) %>&category=<%= encodeURIComponent(category) %>&maxHours=<%= encodeURIComponent(maxHours || '') %>&offset=<%= prevOffset %>&limit=<%= limit %>">← Anterior</a>
+          <a class="button ghost" href="/cursos?q=<%= encodeURIComponent(q) %>&category=<%= encodeURIComponent(category) %>&maxHours=<%= encodeURIComponent(maxHours || '') %>&offset=<%= prevOffset %>&limit=<%= limit %><%= selectedCoursesQuery ? '&' + selectedCoursesQuery : '' %>">← Anterior</a>
         <% } else { %>
           <span></span>
         <% } %>
         <% if (items.length === limit) { %>
-          <a class="button ghost" href="/cursos?q=<%= encodeURIComponent(q) %>&category=<%= encodeURIComponent(category) %>&maxHours=<%= encodeURIComponent(maxHours || '') %>&offset=<%= nextOffset %>&limit=<%= limit %>">Siguiente →</a>
+<a class="button ghost" href="/cursos?q=<%= encodeURIComponent(q) %>&category=<%= encodeURIComponent(category) %>&maxHours=<%= encodeURIComponent(maxHours || '') %>&offset=<%= nextOffset %>&limit=<%= limit %><%= selectedCoursesQuery ? '&' + selectedCoursesQuery : '' %>">Siguiente →</a>
         <% } %>
       </section>
     </main>
