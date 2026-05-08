@@ -875,14 +875,23 @@ button, .button {
 }
 
 @media (max-width: 760px) {
-  .budget-toolbar {
+
+.budget-toolbar {
     top: 76px;
     flex-direction: column;
     align-items: stretch;
   }
+  .budget-toolbar-actions,
+  .selection-tray-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .budget-toolbar-actions .button,
   .budget-toolbar .button {
     width: 100%;
   }
+
+  
   .budget-summary-grid {
     grid-template-columns: 1fr;
   }
