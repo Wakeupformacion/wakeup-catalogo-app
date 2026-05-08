@@ -50,6 +50,14 @@ function buildSelectedCoursesFromRequest(rawCourses) {
   return Array.from(new Set(selected.filter(Boolean)));
 }
 
+function buildSelectedCoursesQuery(selectedCourses = []) {
+  const params = new URLSearchParams();
+  selectedCourses.forEach((slug) => {
+    if (slug) params.append('courses', slug);
+  });
+  return params.toString();
+}
+
 async function getBudgetItems(selectedSlugs) {
   const result = await safeQuery(
     `select id, course_code, title, slug, category_raw, category_normalized, hours, delivery_mode, detail_url
