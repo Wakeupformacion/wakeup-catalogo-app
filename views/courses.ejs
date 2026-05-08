@@ -81,13 +81,29 @@
 
       <% if (items.length) { %>
         <form class="budget-builder" id="budget-builder" action="/presupuesto" method="get">
-          <section class="budget-toolbar" aria-live="polite">
-            <div>
-              <p class="budget-toolbar-label">Selección para presupuesto</p>
-              <p class="budget-toolbar-text"><span id="selected-count">0</span> cursos seleccionados</p>
-            </div>
-            <button type="submit" class="button" id="budget-submit" disabled>Generar presupuesto</button>
-          </section>
+
+<section class="budget-toolbar" aria-live="polite">
+  <div>
+    <p class="budget-toolbar-label">Selección para presupuesto</p>
+    <p class="budget-toolbar-text"><span id="selected-count">0</span> cursos seleccionados</p>
+  </div>
+  <div class="budget-toolbar-actions">
+    <button type="button" class="button ghost" id="clear-selection" disabled>Vaciar selección</button>
+    <button type="submit" class="button" id="budget-submit" disabled>Generar presupuesto</button>
+  </div>
+</section>
+
+<section class="selection-tray" id="selection-tray" hidden>
+  <div class="selection-tray-head">
+    <div>
+      <p class="budget-toolbar-label">Cursos añadidos</p>
+      <p class="selection-tray-text">Mantendremos esta selección aunque cambies la búsqueda o el área.</p>
+    </div>
+    <span class="chip"><span id="selection-tray-count">0</span> guardados</span>
+  </div>
+  <div class="selection-tray-list" id="selection-tray-list"></div>
+</section>
+
 
           <section class="cards selectable-cards">
             <% items.forEach(function(course) { %>
